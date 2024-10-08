@@ -83,7 +83,7 @@ We suggest you define a tasks-oriented timeline for your team so that you can ma
 |-----------------|-----|-----------------|
 | 10/15/2024 at 1:00 pm | Software documentation and testing | [Task 1], [Task 2], [Task 3], [Task 12] |
 | 10/22/2024 at 1:00 pm | Software changes | [Task 6],[Task 7],[Task 8],[Task 9],[Task 10],[Task 4],[Task 5] |
-| 11/29/2024 at 1:00 pm | Software changes, testing, and revision of the software documentation | [Task 11],[Task 12],[Task 1],[Task 2],[Task 3],[Task 4],[Task 5] |
+| 10/29/2024 at 1:00 pm | Software changes, testing, and revision of the software documentation | [Task 11],[Task 12],[Task 1],[Task 2],[Task 3],[Task 4],[Task 5] |
 
 ### Tasks Detailed Description
 This section details the tasks that your team needs to perform in this project iteration.
