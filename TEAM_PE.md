@@ -34,3 +34,4 @@ Establish your own additional team policies around the following aspects:
 **Step 3: Please enter your name. Each one of the team members should add the name through a different commit. For example, student A adds their name and commits, then student B adds their name and commits.**
 * Daniela Ortiz 
 * Joseph Vohnoutka
+* Baanee Singh
