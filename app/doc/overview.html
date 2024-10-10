@@ -1,22 +1,127 @@
 <html>
 <head>
-  <title>Visual Transit Simulator Documentation</title>
+    <title>Overview of VTS Software</title>
 </head>
 <body>
-  <h1>Introduction</h1>
-  <p>Task 1 description of the VTS software.</p>
-  <p> 
-      The VTS software models a vehicle transit system around the University of Minnesota campus.
-      It simulates the behavior of buses and trains operating on specific routes, allowing users to visualize the dynamics of transport operations in a controlled environment.
-      The VTS software facilities provide an understanding of how vehicles serve transit lines, pick up and drop off passangers, and how passenger demands vary at different stops.
-  </p>
-  <h1>UML Class Diagram for Model Classes</h1>
-  <img src="umn.jpg" alt="UML Class Diagram for Model Classes" width="800" height="400">
-  <p>Comments on the UML class diagram for model classes.</p>
-  <h1>UML Class Diagram for Webserver Classes</h1>
-  <img src="umn.jpg" alt="UML Class Diagram for Webserver Classes" width="800" height="400">
-  <p>Comments on the UML class diagram for webserver classes.</p>
+    <h1>Overview of Visual Transit Simulator (VTS) Software</h1>
+
+    <h2>Introduction</h2>
+    <p>
+        The Visual Transit Simulator (VTS) software is designed to model vehicle transit around the University of Minnesota campus. 
+        It simulates the behavior of buses and trains operating on specific routes, allowing users to visualize the dynamics of transit 
+        operations in a controlled environment. The VTS software facilitates an understanding of how vehicles serve transit lines, 
+        pick up and drop off passengers, and how passenger demand varies at different stops.
+    </p>
+
+    <h2>Software Structure</h2>
+    <p>
+        The VTS software is divided into two main modules:
+    </p>
+    <ul>
+        <li>
+            <strong>Visualization Module:</strong> A web client application written in JavaScript and HTML, located in 
+            <code>&lt;dir&gt;/app/src/main/webapp/web_graphics</code>. This module displays the state of the simulation in a 
+            browser, allowing users to interact with the simulation in real-time.
+        </li>
+        <li>
+            <strong>Simulator Module:</strong> A web server application written in Java, located in 
+            <code>&lt;dir&gt;/app/src/main/java/edu/umn/cs/csci3081w/project</code>. This module is further divided into:
+            <ul>
+                <li>
+                    <strong>Model Classes:</strong> Located in 
+                    <code>&lt;dir&gt;/app/src/main/java/edu/umn/cs/csci3081w/project/model</code>, these classes model 
+                    real-world entities such as vehicles and passengers.
+                </li>
+                <li>
+                    <strong>Webserver Classes:</strong> Found in 
+                    <code>&lt;dir&gt;/app/src/main/java/edu/umn/cs/csci3081w/project/webserver</code>, these classes orchestrate 
+                    the simulation and handle communication between the visualization and simulator modules.
+                </li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>Configuration File</h2>
+    <p>
+        The simulation is configured using a configuration file located at 
+        <code>&lt;dir&gt;/app/src/main/resources/config.txt</code>. This file specifies the simulated lines, the stops of the 
+        routes, and the probability of passenger generation at each stop. An example configuration defining a bus line is as follows:
+    </p>
+    <pre>
+				LINE_START, BUS_LINE, Campus Connector
+				
+				ROUTE_START, East Bound
+				STOP, Blegen Hall, 44.972392, -93.243774, .15
+				STOP, Coffman, 44.973580, -93.235071, .3
+				STOP, Oak Street at University Avenue, 44.975392, -93.226632, .025
+				STOP, Transitway at 23rd Avenue SE, 44.975837, -93.222174, .05
+				STOP, Transitway at Commonwealth Avenue, 44.980753, -93.180669, .05
+				STOP, State Fairgrounds Lot S-108, 44.983375, -93.178810, .01
+				STOP, Buford at Gortner Avenue, 44.984540, -93.181692, .01
+				STOP, St. Paul Student Center, 44.984630, -93.186352, 0
+				ROUTE_END
+				
+				ROUTE_START, West Bound
+				STOP, St. Paul Student Center, 44.984630, -93.186352, .35
+				STOP, Buford at Gortner Avenue, 44.984482, -93.181657, .05
+				STOP, State Fairgrounds Lot S-108, 44.983703, -93.178846, .01
+				STOP, Transitway at Commonwealth Avenue, 44.980663, -93.180808, .01
+				STOP, Thompson Center & 23rd Avenue SE, 44.976397, -93.221801, .025
+				STOP, Ridder Arena, 44.978058, -93.229176, .05
+				STOP, Pleasant Street at Jones-Eddy Circle, 44.978366, -93.236038, .1
+				STOP, Bruininks Hall, 44.974549, -93.236927, .3
+				STOP, Blegen Hall, 44.972638, -93.243591, 0
+				ROUTE_END
+				
+				LINE_END
+    </pre>
+
+    <h2>Running the Software</h2>
+    <p>
+        To run the VTS software, follow these steps:
+    </p>
+    <ol>
+        <li>
+            <strong>Start the Simulator Module:</strong> Open a terminal, navigate to the root directory of the project 
+            (<code>&lt;dir&gt;</code>), and run the command:
+            <pre>./gradlew appRun</pre>
+        </li>
+        <li>
+            <strong>Start the Visualization Module:</strong> Open a web browser and paste the following link into the 
+            address bar: 
+            <pre>http://localhost:7777/project/web_graphics/project.html</pre>
+        </li>
+        <li>
+            <strong>Stopping the Modules:</strong> To stop the simulator module, press the enter/return key in the terminal. 
+            To stop the visualization module, simply close the browser tab.
+        </li>
+    </ol>
+    <p>
+        If you encounter issues starting the simulator module due to a previous instance still running, you can terminate 
+        old instances using the following command in the terminal (works on Unix-like operating systems):
+    </p>
+    <pre>ps aux | grep gretty | awk '{print $2}' | xargs -L 1 kill</pre>
+
+    <h2>Simulation Workflow</h2>
+    <p>
+        As a web application, the VTS software does not have a traditional main method. Upon loading the visualization module 
+        in the browser, it establishes a connection to the simulator module via a websocket. This connection triggers the 
+        execution of the <code>WebServerSession.onOpen</code> method in the simulator module.
+    </p>
+    <p>
+        When users click the "Start" button in the GUI, the visualization module sends messages/commands to the simulator module. 
+        These messages are formatted as JSON objects and are processed in the simulator module within the 
+        <code>WebServerSession.onMessage</code> method. The simulator module communicates back to the visualization module using 
+        the <code>WebServerSession.sendJson</code> method. Once the simulation starts, the only way to restart it is by reloading 
+        the visualization module in the browser.
+    </p>
+
+    <h2>Conclusion</h2>
+    <p>
+        Understanding the VTS software codebase is crucial for developers looking to enhance or test the system. 
+        This overview provides a foundational understanding of how to configure, compile, and execute the software. 
+        We encourage other programmers to explore the VTS software, contribute improvements, and engage in testing 
+        for better functionality.
+    </p>
 </body>
 </html>
-
-
