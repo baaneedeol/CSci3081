@@ -1,9 +1,7 @@
 package edu.umn.cs.csci3081w.project.model;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,15 +11,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
-public class BusTest {
+import static org.junit.jupiter.api.Assertions.*;
+
+public class TrainTest {
 
   private List<Stop> stops;
 
   /**
-   * Setup operations before each test runs. Create three stops for the bus so that the routes
+   * Setup operations before each test runs. Create three stops for the train so that the routes
    * have same stop objects.
    */
   @BeforeEach
@@ -36,9 +34,9 @@ public class BusTest {
   }
 
   /**
-   * Create the out test route for the bus. The route has three stops, and the distance
+   * Create the test out route for the train. The route has three stops, and the distance
    * from each stop is added to the list of distances. The probabilities of passengers
-   * getting on the bus at each stop are added to the list of probabilities.
+   * getting on the train at each stop are added to the list of probabilities.
    */
   public Route createTestOutRoute() {
     List<Stop> stopsOut = new ArrayList<Stop>();
@@ -53,12 +51,12 @@ public class BusTest {
     probabilitiesOut.add(0.3);
     probabilitiesOut.add(.0);
     PassengerGenerator generatorOut = new RandomPassengerGenerator(stopsOut, probabilitiesOut);
-    return new Route(10, "testLine", "BUS", "testRouteOut",
+    return new Route(10, "testLine", "TRAIN", "testRouteOut",
         stopsOut, distancesOut, generatorOut);
   }
 
   /**
-   * Create the in test route for the bus.
+   * Create the test in route for the train.
    */
   public Route createTestInRoute() {
     List<Stop> stopsIn = new ArrayList<>();
@@ -73,7 +71,7 @@ public class BusTest {
     probabilitiesIn.add(0.3);
     probabilitiesIn.add(.0);
     PassengerGenerator generatorIn = new RandomPassengerGenerator(stopsIn, probabilitiesIn);
-    return new Route(11, "testLine", "BUS", "testRouteIn",
+    return new Route(11, "testLine", "TRAIN", "testRouteIn",
         stopsIn, distancesIn, generatorIn);
   }
 
@@ -99,25 +97,25 @@ public class BusTest {
   }
 
   /**
-   * Test the Bus constructor to ensure it initializes all fields correctly.
+   * Test the Train constructor to ensure that the Train object is created correctly.
    */
   @Test
   public void testConstructorNormal() {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
-    assertEquals(0, bus.getId());
-    assertEquals(5, bus.getCapacity());
-    assertEquals(1, bus.getSpeed());
-    assertEquals("testRouteOut0", bus.getName());
-    assertEquals(-93.243774, bus.getPosition().getLongitude());
-    assertEquals(44.972392, bus.getPosition().getLatitude());
-    assertEquals(testRouteOut.getStops().getFirst(), bus.getNextStop());
-    assertEquals(0, bus.getPassengers().size());
+    Train train = new Train(0, testRouteOut, testRouteIn, 5, 1);
+    assertEquals(0, train.getId());
+    assertEquals(5, train.getCapacity());
+    assertEquals(1, train.getSpeed());
+    assertEquals("testRouteOut0", train.getName());
+    assertEquals(-93.243774, train.getPosition().getLongitude());
+    assertEquals(44.972392, train.getPosition().getLatitude());
+    assertEquals(testRouteOut.getStops().getFirst(), train.getNextStop());
+    assertEquals(0, train.getPassengers().size());
   }
 
   /**
-   * Test the report method to ensure it prints the bus information correctly.
+   * Test the Train report method to ensure that the Train object is reported correctly.
    */
   @Test
   public void testReport() {
@@ -125,19 +123,19 @@ public class BusTest {
     try {
       Route testRouteOut = createTestOutRoute();
       Route testRouteIn = createTestInRoute();
-      Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
-      // Add a passenger to the bus as it's info should be reported.
+      Train train = new Train(0, testRouteOut, testRouteIn, 5, 1);
+      // Add a passenger to the train as it's info should be reported.
       Passenger passenger = new Passenger(1, "Goldy");
-      bus.loadPassenger(passenger);
+      train.loadPassenger(passenger);
       // Stream to capture the output of the report method.
       final Charset charset = StandardCharsets.UTF_8;
       ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
       PrintStream testStream = new PrintStream(outputStream, true, charset.name());
-      bus.report(testStream);
+      train.report(testStream);
       String output = outputStream.toString(charset);
       testStream.close();
       outputStream.close();
-      String expectedOutput = "####Bus Info Start####" + System.lineSeparator()
+      String expectedOutput = "####Train Info Start####" + System.lineSeparator()
           + "ID: 0" + System.lineSeparator()
           + "Name: testRouteOut0" + System.lineSeparator()
           + "Speed: 1.0" + System.lineSeparator()
@@ -153,7 +151,7 @@ public class BusTest {
           + "Time on vehicle: 1" + System.lineSeparator()
           + "####Passenger Info End####" + System.lineSeparator()
           + "****Passengers Info End****" + System.lineSeparator()
-          + "####Bus Info End####" + System.lineSeparator();
+          + "####Train Info End####" + System.lineSeparator();
       assertEquals(expectedOutput, output);
     } catch (IOException ioe) {
       fail();
@@ -161,109 +159,108 @@ public class BusTest {
   }
 
   /**
-   * Test the isTripComplete method to ensure it returns true when the bus has reached the end of
-   * both routes.
+   * Test the Train isTripComplete method to ensure that the Train object is reported correctly.
    */
   @Test
   public void testIsTripComplete() {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
-    // Bus currently at start of outbound (stop 0)
-    assertFalse(bus.isTripComplete());
-    bus.move();
-    // Bus currently at outbound test stop 1
-    assertFalse(bus.isTripComplete());
-    bus.move();
-    // Bus currently at outbound test stop 2
-    assertFalse(bus.isTripComplete());
-    bus.move();
-    // Bus currently at end of outbound route (test stop 3)
-    assertFalse(bus.isTripComplete());
-    bus.move();
-    // Bus currently at start of inbound route (test stop 3)
-    assertFalse(bus.isTripComplete());
-    bus.move();
-    // Bus currently at inbound test stop 2
-    assertFalse(bus.isTripComplete());
-    bus.move();
-    // Bus currently at inbound test stop 1 and trip is done
-    assertTrue(bus.isTripComplete());
+    Train train = new Train(0, testRouteOut, testRouteIn, 5, 1);
+    // Train currently at start of outbound (stop 0)
+    assertFalse(train.isTripComplete());
+    train.move();
+    // Train currently at outbound test stop 1
+    assertFalse(train.isTripComplete());
+    train.move();
+    // Train currently at outbound test stop 2
+    assertFalse(train.isTripComplete());
+    train.move();
+    // Train currently at end of outbound route (test stop 3)
+    assertFalse(train.isTripComplete());
+    train.move();
+    // Train currently at start of inbound route (test stop 3)
+    assertFalse(train.isTripComplete());
+    train.move();
+    // Train currently at inbound test stop 2
+    assertFalse(train.isTripComplete());
+    train.move();
+    // Train currently at inbound test stop 1 and trip is done
+    assertTrue(train.isTripComplete());
   }
 
   /**
-   * Test the loadPassenger method to ensure it loads passengers onto the bus correctly.
+   * Test the Train loadPassenger method to ensure that the Train object is reported correctly.
    */
   @Test
   public void testLoadPassenger() {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
+    Train train = new Train(0, testRouteOut, testRouteIn, 5, 1);
     Passenger passenger1 = new Passenger(1, "Goldy1");
     Passenger passenger2 = new Passenger(1, "Goldy2");
     Passenger passenger3 = new Passenger(1, "Goldy3");
     Passenger passenger4 = new Passenger(1, "Goldy4");
     Passenger passenger5 = new Passenger(1, "Goldy5");
     Passenger passenger6 = new Passenger(1, "Goldy6");
-    int result1 = bus.loadPassenger(passenger1);
+    int result1 = train.loadPassenger(passenger1);
     assertEquals(1, result1);
-    assertEquals(1, bus.getPassengers().size());
+    assertEquals(1, train.getPassengers().size());
 
-    int result2 = bus.loadPassenger(passenger2);
+    int result2 = train.loadPassenger(passenger2);
     assertEquals(1, result2);
-    assertEquals(2, bus.getPassengers().size());
+    assertEquals(2, train.getPassengers().size());
 
-    int result3 = bus.loadPassenger(passenger3);
+    int result3 = train.loadPassenger(passenger3);
     assertEquals(1, result3);
-    assertEquals(3, bus.getPassengers().size());
+    assertEquals(3, train.getPassengers().size());
 
-    int result4 = bus.loadPassenger(passenger4);
+    int result4 = train.loadPassenger(passenger4);
     assertEquals(1, result4);
-    assertEquals(4, bus.getPassengers().size());
+    assertEquals(4, train.getPassengers().size());
 
-    int result5 = bus.loadPassenger(passenger5);
+    int result5 = train.loadPassenger(passenger5);
     assertEquals(1, result5);
-    assertEquals(5, bus.getPassengers().size());
+    assertEquals(5, train.getPassengers().size());
 
-    // Bus is full, so no more passengers can be loaded.
-    int result6 = bus.loadPassenger(passenger6);
+    // Train is full, so no more passengers can be loaded.
+    int result6 = train.loadPassenger(passenger6);
     assertEquals(0, result6);
-    assertEquals(5, bus.getPassengers().size());
+    assertEquals(5, train.getPassengers().size());
   }
 
   /**
-   * Test move method to ensure the bus moves to the next stop.
+   * Test move method to ensure the train moves to the next stop.
    */
   @Test
   public void testMove() {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
-    // Bus currently at start of outbound (stop 0)
-    // NOTE: When the bus is created, the bus position is set to the first stop,
-    // but the bus is not actually at the first stop since the first stop in the route is
+    Train train = new Train(0, testRouteOut, testRouteIn, 5, 1);
+    // Train currently at start of outbound (stop 0)
+    // NOTE: When the train is created, the train position is set to the first stop,
+    // but the train is not actually at the first stop since the first stop in the route is
     // also set as the next stop.
-    assertEquals(-93.243774, bus.getPosition().getLongitude());
-    assertEquals(44.972392, bus.getPosition().getLatitude());
+    assertEquals(-93.243774, train.getPosition().getLongitude());
+    assertEquals(44.972392, train.getPosition().getLatitude());
     // Test the next stop is the first stop in the route.
-    assertEquals(testRouteOut.getStops().getFirst(), bus.getNextStop());
-    bus.move();
-    // Bus currently at outbound test stop 1
-    assertEquals(-93.243774, bus.getPosition().getLongitude());
-    assertEquals(44.972392, bus.getPosition().getLatitude());
+    assertEquals(testRouteOut.getStops().getFirst(), train.getNextStop());
+    train.move();
+    // Train currently at outbound test stop 1
+    assertEquals(-93.243774, train.getPosition().getLongitude());
+    assertEquals(44.972392, train.getPosition().getLatitude());
     // Test the next stop is the second stop in the route.
-    assertEquals(testRouteOut.getStops().get(1), bus.getNextStop());
-    bus.move();
-    // Bus currently at outbound test stop 2
-    assertEquals(-93.235071, bus.getPosition().getLongitude());
-    assertEquals(44.973580, bus.getPosition().getLatitude());
+    assertEquals(testRouteOut.getStops().get(1), train.getNextStop());
+    train.move();
+    // Train currently at outbound test stop 2
+    assertEquals(-93.235071, train.getPosition().getLongitude());
+    assertEquals(44.973580, train.getPosition().getLatitude());
     // Test the next stop is the third stop in the route.
-    assertEquals(testRouteOut.getStops().get(2), bus.getNextStop());
+    assertEquals(testRouteOut.getStops().get(2), train.getNextStop());
   }
 
   /**
-   * Test the move method with people on the bus to ensure they are updated correctly.
-   * The bus should get more passengers at each stop, but the bus should not be able to
+   * Test the move method with people on the train to ensure they are updated correctly.
+   * The train should get more passengers at each stop, but the train should not be able to
    * load more passengers if it is full.
    */
   @Test
@@ -274,7 +271,7 @@ public class BusTest {
     for (int i = 1; i <= 6; i++) {
       passengers.add(new Passenger(0, "Goldy" + i));
     }
-    // Add passengers to stops so they can be loaded onto the bus later.
+    // Add passengers to stops so they can be loaded onto the train later.
     testRouteOut.getStops().get(0).addPassengers(passengers.get(0));
     testRouteOut.getStops().get(1).addPassengers(passengers.get(1));
     testRouteOut.getStops().get(1).addPassengers(passengers.get(2));
@@ -282,37 +279,37 @@ public class BusTest {
     testRouteOut.getStops().get(2).addPassengers(passengers.get(4));
     testRouteOut.getStops().get(2).addPassengers(passengers.get(5));
 
-    Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
-    // Bus currently at start of outbound (stop 0)
-    // NOTE: When the bus is created, the bus position is set to the first stop,
-    // but the bus is not actually at the first stop since the first stop in the route is
+    Train train = new Train(0, testRouteOut, testRouteIn, 5, 1);
+    // Train currently at start of outbound (stop 0)
+    // NOTE: When the train is created, the train position is set to the first stop,
+    // but the train is not actually at the first stop since the first stop in the route is
     // also set as the next stop.
     // Test the next stop is the first stop in the route.
-    bus.move();
-    // Bus currently at outbound test stop 1.
-    assertEquals(1, bus.getPassengers().size());
+    train.move();
+    // Train currently at outbound test stop 1.
+    assertEquals(1, train.getPassengers().size());
     assertEquals(0, testRouteOut.getStops().get(0).getPassengers().size());
-    bus.move();
-    // Bus currently at outbound test stop 2.
-    assertEquals(3, bus.getPassengers().size());
+    train.move();
+    // Train currently at outbound test stop 2.
+    assertEquals(3, train.getPassengers().size());
     assertEquals(0, testRouteOut.getStops().get(1).getPassengers().size());
-    bus.move();
-    // Bus currently at outbound test stop 3 and passengers are loaded onto the bus
+    train.move();
+    // Train currently at outbound test stop 3 and passengers are loaded onto the train
     // and the stop should have one passenger left.
-    assertEquals(5, bus.getPassengers().size());
+    assertEquals(5, train.getPassengers().size());
     assertEquals(1, testRouteOut.getStops().get(2).getPassengers().size());
-    // Move the bus and check that passengers get off the bus at stop 1.
-    bus.move();
-    // Bus currently at start of inbound (stop 3). Nothing should happen at this stop.
-    assertEquals(5, bus.getPassengers().size());
+    // Move the train and check that passengers get off the train at stop 1.
+    train.move();
+    // Train currently at start of inbound (stop 3). Nothing should happen at this stop.
+    assertEquals(5, train.getPassengers().size());
     assertEquals(1, testRouteIn.getStops().get(0).getPassengers().size());
-    bus.move();
-    // Bus currently at inbound test stop 2. Nothing should happen at this stop.
-    assertEquals(5, bus.getPassengers().size());
+    train.move();
+    // Train currently at inbound test stop 2. Nothing should happen at this stop.
+    assertEquals(5, train.getPassengers().size());
     assertEquals(0, testRouteIn.getStops().get(1).getPassengers().size());
-    bus.move();
-    // Bus currently at inbound test stop 1. Passengers should get off the bus.
-    assertEquals(0, bus.getPassengers().size());
+    train.move();
+    // Train currently at inbound test stop 1. Passengers should get off the train.
+    assertEquals(0, train.getPassengers().size());
     assertEquals(0, testRouteIn.getStops().get(2).getPassengers().size());
     // Make sure all the passengers were updated by comparing reports.
     List<String> passengerNames = Arrays.asList("Goldy1", "Goldy2", "Goldy3",
@@ -330,33 +327,33 @@ public class BusTest {
   }
 
   /**
-   * Test the update method to ensure it updates the bus and passengers correctly.
+   * Test the update method to ensure it updates the train and passengers correctly.
    */
   @Test
   public void testUpdate() {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
-    // Bus currently at start of outbound (stop 0)
-    // NOTE: When the bus is created, the bus position is set to the first stop,
-    // but the bus is not actually at the first stop since the first stop in the route is
+    Train train = new Train(0, testRouteOut, testRouteIn, 5, 1);
+    // Train currently at start of outbound (stop 0)
+    // NOTE: When the train is created, the train position is set to the first stop,
+    // but the train is not actually at the first stop since the first stop in the route is
     // also set as the next stop.
-    assertEquals(-93.243774, bus.getPosition().getLongitude());
-    assertEquals(44.972392, bus.getPosition().getLatitude());
+    assertEquals(-93.243774, train.getPosition().getLongitude());
+    assertEquals(44.972392, train.getPosition().getLatitude());
     // Test the next stop is the first stop in the route.
-    assertEquals(testRouteOut.getStops().getFirst(), bus.getNextStop());
-    bus.update();
-    // Bus currently at outbound test stop 1
-    assertEquals(-93.243774, bus.getPosition().getLongitude());
-    assertEquals(44.972392, bus.getPosition().getLatitude());
+    assertEquals(testRouteOut.getStops().getFirst(), train.getNextStop());
+    train.update();
+    // Train currently at outbound test stop 1
+    assertEquals(-93.243774, train.getPosition().getLongitude());
+    assertEquals(44.972392, train.getPosition().getLatitude());
     // Test the next stop is the second stop in the route.
-    assertEquals(testRouteOut.getStops().get(1), bus.getNextStop());
-    bus.update();
-    // Bus currently at outbound test stop 2
-    assertEquals(-93.235071, bus.getPosition().getLongitude());
-    assertEquals(44.973580, bus.getPosition().getLatitude());
+    assertEquals(testRouteOut.getStops().get(1), train.getNextStop());
+    train.update();
+    // Train currently at outbound test stop 2
+    assertEquals(-93.235071, train.getPosition().getLongitude());
+    assertEquals(44.973580, train.getPosition().getLatitude());
     // Test the next stop is the third stop in the route.
-    assertEquals(testRouteOut.getStops().get(2), bus.getNextStop());
+    assertEquals(testRouteOut.getStops().get(2), train.getNextStop());
   }
 
   /**
@@ -370,7 +367,7 @@ public class BusTest {
     for (int i = 1; i <= 6; i++) {
       passengers.add(new Passenger(0, "Goldy" + i));
     }
-    // Add passengers to stops so they can be loaded onto the bus later.
+    // Add passengers to stops so they can be loaded onto the train later.
     testRouteOut.getStops().get(0).addPassengers(passengers.get(0));
     testRouteOut.getStops().get(1).addPassengers(passengers.get(1));
     testRouteOut.getStops().get(1).addPassengers(passengers.get(2));
@@ -378,37 +375,37 @@ public class BusTest {
     testRouteOut.getStops().get(2).addPassengers(passengers.get(4));
     testRouteOut.getStops().get(2).addPassengers(passengers.get(5));
 
-    Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
-    // Bus currently at start of outbound (stop 0)
-    // NOTE: When the bus is created, the bus position is set to the first stop,
-    // but the bus is not actually at the first stop since the first stop in the route is
+    Train train = new Train(0, testRouteOut, testRouteIn, 5, 1);
+    // Train currently at start of outbound (stop 0)
+    // NOTE: When the train is created, the train position is set to the first stop,
+    // but the train is not actually at the first stop since the first stop in the route is
     // also set as the next stop.
     // Test the next stop is the first stop in the route.
-    bus.update();
-    // Bus currently at outbound test stop 1.
-    assertEquals(1, bus.getPassengers().size());
+    train.update();
+    // Train currently at outbound test stop 1.
+    assertEquals(1, train.getPassengers().size());
     assertEquals(0, testRouteOut.getStops().get(0).getPassengers().size());
-    bus.update();
-    // Bus currently at outbound test stop 2.
-    assertEquals(3, bus.getPassengers().size());
+    train.update();
+    // Train currently at outbound test stop 2.
+    assertEquals(3, train.getPassengers().size());
     assertEquals(0, testRouteOut.getStops().get(1).getPassengers().size());
-    bus.update();
-    // Bus currently at outbound test stop 3 and passengers are loaded onto the bus
+    train.update();
+    // Train currently at outbound test stop 3 and passengers are loaded onto the train
     // and the stop should have one passenger left.
-    assertEquals(5, bus.getPassengers().size());
+    assertEquals(5, train.getPassengers().size());
     assertEquals(1, testRouteOut.getStops().get(2).getPassengers().size());
-    // Move the bus and check that passengers get off the bus at stop 1.
-    bus.update();
-    // Bus currently at start of inbound (stop 3). Nothing should happen at this stop.
-    assertEquals(5, bus.getPassengers().size());
+    // Move the train and check that passengers get off the train at stop 1.
+    train.update();
+    // Train currently at start of inbound (stop 3). Nothing should happen at this stop.
+    assertEquals(5, train.getPassengers().size());
     assertEquals(1, testRouteIn.getStops().get(0).getPassengers().size());
-    bus.update();
-    // Bus currently at inbound test stop 2. Nothing should happen at this stop.
-    assertEquals(5, bus.getPassengers().size());
+    train.update();
+    // Train currently at inbound test stop 2. Nothing should happen at this stop.
+    assertEquals(5, train.getPassengers().size());
     assertEquals(0, testRouteIn.getStops().get(1).getPassengers().size());
-    bus.update();
-    // Bus currently at inbound test stop 1. Passengers should get off the bus.
-    assertEquals(0, bus.getPassengers().size());
+    train.update();
+    // Train currently at inbound test stop 1. Passengers should get off the train.
+    assertEquals(0, train.getPassengers().size());
     assertEquals(0, testRouteIn.getStops().get(2).getPassengers().size());
     // Make sure all the passengers were updated by comparing reports.
     List<String> passengerNames = Arrays.asList("Goldy1", "Goldy2", "Goldy3",
@@ -424,5 +421,4 @@ public class BusTest {
       assertTrue(passengerReport.contains("Time on vehicle: " + passengerTimeOnVehicle.get(i)));
     }
   }
-
 }
