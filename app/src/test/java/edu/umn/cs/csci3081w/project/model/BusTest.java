@@ -2,6 +2,7 @@ package edu.umn.cs.csci3081w.project.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -11,17 +12,19 @@ import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class BusTest {
 
   private List<Stop> stops;
 
   /**
-   * Setup operations before each test runs. Create three stops for the bus so that the routes
+   * Setup operations before each test runs.
+   * Create three stops for the bus so that the routes
    * have same stop objects.
    */
   @BeforeEach
@@ -77,6 +80,50 @@ public class BusTest {
         stopsIn, distancesIn, generatorIn);
   }
 
+
+  /**
+   * Helper method to create a list of passengers with the given count.
+   * @param count Number of passengers to create.
+   * @return List of created passengers.
+   */
+  private List<Passenger> createPassengers(int count) {
+    List<Passenger> passengers = new ArrayList<>();
+    for (int i = 0; i < count; i++) {
+      passengers.add(new Passenger(0, "Goldy" + i));
+    }
+    return passengers;
+  }
+
+  /**
+   * Helper method to add passengers to stops.
+   * @param stops List of stops.
+   * @param passengers List of passengers.
+   */
+  private void addPassengersToStops(List<Stop> stops, List<Passenger> passengers) {
+    int stopIndex = 0;
+    for (Passenger passenger : passengers) {
+      stops.get(stopIndex).addPassengers(passenger);
+      stopIndex = (stopIndex + 1) % stops.size(); // Cycle through stops
+    }
+  }
+
+  /**
+   * Helper method to check passenger updates against expected values.
+   * @param passengers List of passengers.
+   * @param expectedWaitAtStop List of expected wait times at stop.
+   * @param expectedTimeOnVehicle List of expected time spent on vehicle.
+   */
+  private void checkPassengerUpdates(List<Passenger> passengers,
+                                     List<Integer> expectedWaitAtStop,
+                                     List<Integer> expectedTimeOnVehicle) {
+    for (int i = 0; i < passengers.size(); i++) {
+      Passenger passenger = passengers.get(i);
+      String passengerReport = getPassengerReport(passenger);
+      assertTrue(passengerReport.contains("Wait at stop: " + expectedWaitAtStop.get(i)));
+      assertTrue(passengerReport.contains("Time on vehicle: " + expectedTimeOnVehicle.get(i)));
+    }
+  }
+
   /**
    * Get the string output of the report method for a passenger.
    * @param passenger Passenger to get the report for.
@@ -117,10 +164,47 @@ public class BusTest {
   }
 
   /**
-   * Test the report method to ensure it prints the bus information correctly.
+   * Test the report method to ensure it prints the bus information correctly with
+   * no passengers on the bus.
    */
   @Test
-  public void testReport() {
+  public void testReportNoPassengers() {
+    // In try catch block to handle Exception with PrintStream.
+    try {
+      Route testRouteOut = createTestOutRoute();
+      Route testRouteIn = createTestInRoute();
+      Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
+      // Stream to capture the output of the report method.
+      final Charset charset = StandardCharsets.UTF_8;
+      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+      PrintStream testStream = new PrintStream(outputStream, true, charset.name());
+      bus.report(testStream);
+      String output = outputStream.toString(charset);
+      testStream.close();
+      outputStream.close();
+      String expectedOutput = "####Bus Info Start####" + System.lineSeparator()
+          + "ID: 0" + System.lineSeparator()
+          + "Name: testRouteOut0" + System.lineSeparator()
+          + "Speed: 1.0" + System.lineSeparator()
+          + "Capacity: 5" + System.lineSeparator()
+          + "Position: 44.972392,-93.243774" + System.lineSeparator()
+          + "Distance to next stop: 0.0" + System.lineSeparator()
+          + "****Passengers Info Start****" + System.lineSeparator()
+          + "Num of passengers: 0" + System.lineSeparator()
+          + "****Passengers Info End****" + System.lineSeparator()
+          + "####Bus Info End####" + System.lineSeparator();
+      assertEquals(expectedOutput, output);
+    } catch (IOException ioe) {
+      fail();
+    }
+  }
+
+  /**
+   * Test the report method to ensure it prints the bus information correctly with
+   * a passenger on the bus.
+   */
+  @Test
+  public void testReportWithPassenger() {
     // In try catch block to handle Exception with PrintStream.
     try {
       Route testRouteOut = createTestOutRoute();
@@ -191,44 +275,46 @@ public class BusTest {
     assertTrue(bus.isTripComplete());
   }
 
+
   /**
-   * Test the loadPassenger method to ensure it loads passengers onto the bus correctly.
+   * Test the loadPassenger method with different passenger counts.
+   * @param passengerCount Number of passengers to load.
    */
-  @Test
-  public void testLoadPassenger() {
+  @ParameterizedTest
+  @ValueSource(ints = {0, 1, 4, 5, 6})
+  public void testLoadPassenger(int passengerCount) {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
     Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
-    Passenger passenger1 = new Passenger(1, "Goldy1");
-    Passenger passenger2 = new Passenger(1, "Goldy2");
-    Passenger passenger3 = new Passenger(1, "Goldy3");
-    Passenger passenger4 = new Passenger(1, "Goldy4");
-    Passenger passenger5 = new Passenger(1, "Goldy5");
-    Passenger passenger6 = new Passenger(1, "Goldy6");
-    int result1 = bus.loadPassenger(passenger1);
-    assertEquals(1, result1);
-    assertEquals(1, bus.getPassengers().size());
+    List<Passenger> passengers = createPassengers(passengerCount);
 
-    int result2 = bus.loadPassenger(passenger2);
-    assertEquals(1, result2);
-    assertEquals(2, bus.getPassengers().size());
+    int loadedCount = 0;
+    for (Passenger passenger : passengers) {
+      loadedCount += bus.loadPassenger(passenger);
+    }
 
-    int result3 = bus.loadPassenger(passenger3);
-    assertEquals(1, result3);
-    assertEquals(3, bus.getPassengers().size());
+    int expectedLoadedCount = Math.min(passengerCount, 5); // Capacity is 5
+    assertEquals(expectedLoadedCount, loadedCount);
+    assertEquals(expectedLoadedCount, bus.getPassengers().size());
+  }
 
-    int result4 = bus.loadPassenger(passenger4);
-    assertEquals(1, result4);
-    assertEquals(4, bus.getPassengers().size());
+  /**
+   * Test unloading passengers at a stop.
+   */
+  @Test
+  public void testUnloadPassengersAtStop() {
+    Route testRouteOut = createTestOutRoute();
+    Route testRouteIn = createTestInRoute();
+    Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
 
-    int result5 = bus.loadPassenger(passenger5);
-    assertEquals(1, result5);
-    assertEquals(5, bus.getPassengers().size());
+    List<Passenger> passengers = createPassengers(3);
+    bus.getPassengers().addAll(passengers); // Directly add passengers to the bus
 
-    // Bus is full, so no more passengers can be loaded.
-    int result6 = bus.loadPassenger(passenger6);
-    assertEquals(0, result6);
-    assertEquals(5, bus.getPassengers().size());
+    Stop toBeStop = testRouteOut.getStops().getFirst();
+    bus.move(); // Move to the next stop
+
+    assertEquals(0, bus.getPassengers().size());
+    assertEquals(0, toBeStop.getPassengers().size()); // Stop should have no passengers
   }
 
   /**
@@ -261,73 +347,43 @@ public class BusTest {
     assertEquals(testRouteOut.getStops().get(2), bus.getNextStop());
   }
 
+
   /**
-   * Test the move method with people on the bus to ensure they are updated correctly.
+   * Test the move method with passengers on the bus to ensure they are updated correctly.
    * The bus should get more passengers at each stop, but the bus should not be able to
    * load more passengers if it is full.
    */
   @Test
-  public void testMoveWithPassengers() {
+  public void testMoveHandlesPassengersCorrectly() {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    List<Passenger> passengers = new ArrayList<>();
-    for (int i = 1; i <= 6; i++) {
-      passengers.add(new Passenger(0, "Goldy" + i));
-    }
-    // Add passengers to stops so they can be loaded onto the bus later.
-    testRouteOut.getStops().get(0).addPassengers(passengers.get(0));
-    testRouteOut.getStops().get(1).addPassengers(passengers.get(1));
-    testRouteOut.getStops().get(1).addPassengers(passengers.get(2));
-    testRouteOut.getStops().get(2).addPassengers(passengers.get(3));
-    testRouteOut.getStops().get(2).addPassengers(passengers.get(4));
-    testRouteOut.getStops().get(2).addPassengers(passengers.get(5));
+    List<Passenger> passengers = createPassengers(6);
+
+    // Add passengers to the stops
+    addPassengersToStops(testRouteOut.getStops(), passengers);
 
     Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
-    // Bus currently at start of outbound (stop 0)
-    // NOTE: When the bus is created, the bus position is set to the first stop,
-    // but the bus is not actually at the first stop since the first stop in the route is
-    // also set as the next stop.
-    // Test the next stop is the first stop in the route.
-    bus.move();
-    // Bus currently at outbound test stop 1.
-    assertEquals(1, bus.getPassengers().size());
-    assertEquals(0, testRouteOut.getStops().get(0).getPassengers().size());
-    bus.move();
-    // Bus currently at outbound test stop 2.
-    assertEquals(3, bus.getPassengers().size());
-    assertEquals(0, testRouteOut.getStops().get(1).getPassengers().size());
-    bus.move();
-    // Bus currently at outbound test stop 3 and passengers are loaded onto the bus
-    // and the stop should have one passenger left.
+
+    // Move the bus through the outbound route
+    bus.move(); // Stop 0 -> Stop 1 (loads 1 passenger)
+    assertEquals(2, bus.getPassengers().size());
+    bus.move(); // Stop 1 -> Stop 2 (loads 2 passengers, total 3)
+    assertEquals(4, bus.getPassengers().size());
+    bus.move(); // Stop 2 -> Stop 3 (loads 2 passengers, reaches capacity 5)
     assertEquals(5, bus.getPassengers().size());
-    assertEquals(1, testRouteOut.getStops().get(2).getPassengers().size());
-    // Move the bus and check that passengers get off the bus at stop 1.
-    bus.move();
-    // Bus currently at start of inbound (stop 3). Nothing should happen at this stop.
+
+    // Check that the bus doesn't load more than its capacity
+    assertEquals(1, testRouteOut.getStops().get(2).getPassengers().size()); // 1 left at the stop
+
+    // Move the bus through the inbound route (no more loading should occur)
+    bus.move(); // Stop 3 (inbound start) -> Stop 2
     assertEquals(5, bus.getPassengers().size());
-    assertEquals(1, testRouteIn.getStops().get(0).getPassengers().size());
-    bus.move();
-    // Bus currently at inbound test stop 2. Nothing should happen at this stop.
+    bus.move(); // Stop 2 -> Stop 1
     assertEquals(5, bus.getPassengers().size());
-    assertEquals(0, testRouteIn.getStops().get(1).getPassengers().size());
-    bus.move();
-    // Bus currently at inbound test stop 1. Passengers should get off the bus.
+    bus.move(); // Stop 1 -> Stop 0 (all passengers should unload)
     assertEquals(0, bus.getPassengers().size());
-    assertEquals(0, testRouteIn.getStops().get(2).getPassengers().size());
-    // Make sure all the passengers were updated by comparing reports.
-    List<String> passengerNames = Arrays.asList("Goldy1", "Goldy2", "Goldy3",
-        "Goldy4", "Goldy5", "Goldy6");
-    // Passengers will have no wait stop since stop is not updated in this test.
-    List<Integer> passengerWaitAtStop = Arrays.asList(0, 0, 0, 0, 0, 0);
-    List<Integer> passengerTimeOnVehicle = Arrays.asList(6, 5, 5, 4, 4, 0);
-    for (int i = 0; i < passengers.size(); i++) {
-      Passenger passenger = passengers.get(i);
-      String passengerReport = getPassengerReport(passenger);
-      assertTrue(passengerReport.contains(passengerNames.get(i)));
-      assertTrue(passengerReport.contains("Wait at stop: " + passengerWaitAtStop.get(i)));
-      assertTrue(passengerReport.contains("Time on vehicle: " + passengerTimeOnVehicle.get(i)));
-    }
   }
+
 
   /**
    * Test the update method to ensure it updates the bus and passengers correctly.
@@ -363,66 +419,85 @@ public class BusTest {
    * Test the update method with passengers on the bus to ensure they are updated correctly.
    */
   @Test
-  public void testUpdateWithPassengers() {
+  public void testUpdateHandlesPassengersCorrectly() {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    List<Passenger> passengers = new ArrayList<>();
-    for (int i = 1; i <= 6; i++) {
-      passengers.add(new Passenger(0, "Goldy" + i));
-    }
-    // Add passengers to stops so they can be loaded onto the bus later.
-    testRouteOut.getStops().get(0).addPassengers(passengers.get(0));
-    testRouteOut.getStops().get(1).addPassengers(passengers.get(1));
-    testRouteOut.getStops().get(1).addPassengers(passengers.get(2));
-    testRouteOut.getStops().get(2).addPassengers(passengers.get(3));
-    testRouteOut.getStops().get(2).addPassengers(passengers.get(4));
-    testRouteOut.getStops().get(2).addPassengers(passengers.get(5));
+    List<Passenger> passengers = createPassengers(6);
+
+    // Add passengers to the stops
+    addPassengersToStops(testRouteOut.getStops(), passengers);
 
     Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
-    // Bus currently at start of outbound (stop 0)
-    // NOTE: When the bus is created, the bus position is set to the first stop,
-    // but the bus is not actually at the first stop since the first stop in the route is
-    // also set as the next stop.
-    // Test the next stop is the first stop in the route.
-    bus.update();
-    // Bus currently at outbound test stop 1.
-    assertEquals(1, bus.getPassengers().size());
-    assertEquals(0, testRouteOut.getStops().get(0).getPassengers().size());
-    bus.update();
-    // Bus currently at outbound test stop 2.
-    assertEquals(3, bus.getPassengers().size());
-    assertEquals(0, testRouteOut.getStops().get(1).getPassengers().size());
-    bus.update();
-    // Bus currently at outbound test stop 3 and passengers are loaded onto the bus
-    // and the stop should have one passenger left.
+
+    // Update the bus through the outbound route
+    bus.update(); // Stop 0 -> Stop 1 (loads 1 passenger)
+    assertEquals(2, bus.getPassengers().size());
+    bus.update(); // Stop 1 -> Stop 2 (loads 2 passengers, total 3)
+    assertEquals(4, bus.getPassengers().size());
+    bus.update(); // Stop 2 -> Stop 3 (loads 2 passengers, reaches capacity 5)
     assertEquals(5, bus.getPassengers().size());
-    assertEquals(1, testRouteOut.getStops().get(2).getPassengers().size());
-    // Move the bus and check that passengers get off the bus at stop 1.
-    bus.update();
-    // Bus currently at start of inbound (stop 3). Nothing should happen at this stop.
+
+    // Check that the bus doesn't load more than its capacity
+    assertEquals(1, testRouteOut.getStops().get(2).getPassengers().size()); // 1 left at the stop
+
+    // Update the bus through the inbound route (no more loading should occur)
+    bus.update(); // Stop 3 (inbound start) -> Stop 2
     assertEquals(5, bus.getPassengers().size());
-    assertEquals(1, testRouteIn.getStops().get(0).getPassengers().size());
-    bus.update();
-    // Bus currently at inbound test stop 2. Nothing should happen at this stop.
+    bus.update(); // Stop 2 -> Stop 1
     assertEquals(5, bus.getPassengers().size());
-    assertEquals(0, testRouteIn.getStops().get(1).getPassengers().size());
-    bus.update();
-    // Bus currently at inbound test stop 1. Passengers should get off the bus.
+    bus.update(); // Stop 1 -> Stop 0 (all passengers should unload)
     assertEquals(0, bus.getPassengers().size());
-    assertEquals(0, testRouteIn.getStops().get(2).getPassengers().size());
-    // Make sure all the passengers were updated by comparing reports.
-    List<String> passengerNames = Arrays.asList("Goldy1", "Goldy2", "Goldy3",
-        "Goldy4", "Goldy5", "Goldy6");
-    // Passengers will have no wait stop since stop is not updated in this test.
-    List<Integer> passengerWaitAtStop = Arrays.asList(0, 0, 0, 0, 0, 0);
-    List<Integer> passengerTimeOnVehicle = Arrays.asList(6, 5, 5, 4, 4, 0);
-    for (int i = 0; i < passengers.size(); i++) {
-      Passenger passenger = passengers.get(i);
-      String passengerReport = getPassengerReport(passenger);
-      assertTrue(passengerReport.contains(passengerNames.get(i)));
-      assertTrue(passengerReport.contains("Wait at stop: " + passengerWaitAtStop.get(i)));
-      assertTrue(passengerReport.contains("Time on vehicle: " + passengerTimeOnVehicle.get(i)));
-    }
   }
 
+  /**
+   * Test that the bus correctly switches to the inbound route after reaching the end of
+   * the outbound route.
+   */
+  @Test
+  public void testRouteSwitching() {
+    Route testRouteOut = createTestOutRoute();
+    Route testRouteIn = createTestInRoute();
+    Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
+
+    // Move the bus to the end of the outbound route
+    for (int i = 0; i < testRouteOut.getStops().size(); i++) {
+      bus.move();
+    }
+
+    // Check that the next stop is the first stop of the inbound route
+    assertEquals(testRouteIn.getStops().get(0), bus.getNextStop());
+
+    // Move the bus one more step and verify it's on the inbound route
+    bus.move();
+    assertEquals(testRouteIn.getStops().get(1), bus.getNextStop());
+  }
+
+  /**
+   * Test the move method with different speeds.
+   * @param speed Speed of the bus.
+   */
+  @ParameterizedTest
+  @ValueSource(doubles = {0.5, 0.98, 1.0, 2.0, -1.0, 0.0})
+  public void testMoveWithDifferentSpeeds(double speed) {
+    Route testRouteOut = createTestOutRoute();
+    Route testRouteIn = createTestInRoute();
+    Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, speed);
+
+    bus.move(); // Move to first stop
+
+    Stop nextStop = bus.getNextStop();
+    Double distanceToNextStop = testRouteOut.getNextStopDistance();
+
+    bus.move();
+
+    if (speed > distanceToNextStop) {
+      assertNotEquals(nextStop, bus.getNextStop());
+    } else if (speed < distanceToNextStop) {
+      // Should not move if speed is negative
+      assertEquals(nextStop, bus.getNextStop());
+    } else {
+      // Should not move if speed is zero
+      assertEquals(nextStop, bus.getNextStop());
+    }
+  }
 }
