@@ -56,7 +56,7 @@ public class TrainTest {
     probabilitiesOut.add(0.3);
     probabilitiesOut.add(.0);
     PassengerGenerator generatorOut = new RandomPassengerGenerator(stopsOut, probabilitiesOut);
-    return new Route(10, "testLine", "BUS", "testRouteOut",
+    return new Route(10, "testLine", "TRAIN", "testRouteOut",
         stopsOut, distancesOut, generatorOut);
   }
 
@@ -76,7 +76,7 @@ public class TrainTest {
     probabilitiesIn.add(0.3);
     probabilitiesIn.add(.0);
     PassengerGenerator generatorIn = new RandomPassengerGenerator(stopsIn, probabilitiesIn);
-    return new Route(11, "testLine", "BUS", "testRouteIn",
+    return new Route(11, "testLine", "TRAIN", "testRouteIn",
         stopsIn, distancesIn, generatorIn);
   }
 
