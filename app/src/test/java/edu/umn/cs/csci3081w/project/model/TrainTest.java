@@ -447,6 +447,11 @@ public class TrainTest {
     assertEquals(5, train.getPassengers().size());
     train.update(); // Stop 1 -> Stop 0 (all passengers should unload)
     assertEquals(0, train.getPassengers().size());
+
+    // Make sure the passengers are updated correctly
+    List<Integer> expectedWaitAtStop = List.of(0, 0, 0, 0, 0, 0);
+    List<Integer> expectedTimeOnVehicle = List.of(6, 5, 4, 6, 5, 0);
+    checkPassengerUpdates(passengers, expectedWaitAtStop, expectedTimeOnVehicle);
   }
 
   /**

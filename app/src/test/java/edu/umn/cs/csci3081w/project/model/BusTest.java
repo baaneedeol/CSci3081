@@ -386,7 +386,7 @@ public class BusTest {
 
 
   /**
-   * Test the update method to ensure it updates the bus and passengers correctly.
+   * Test the update method to ensure it updates the bus correctly.
    */
   @Test
   public void testUpdate() {
@@ -447,6 +447,11 @@ public class BusTest {
     assertEquals(5, bus.getPassengers().size());
     bus.update(); // Stop 1 -> Stop 0 (all passengers should unload)
     assertEquals(0, bus.getPassengers().size());
+
+    // Make sure the passengers are updated correctly
+    List<Integer> expectedWaitAtStop = List.of(0, 0, 0, 0, 0, 0);
+    List<Integer> expectedTimeOnVehicle = List.of(6, 5, 4, 6, 5, 0);
+    checkPassengerUpdates(passengers, expectedWaitAtStop, expectedTimeOnVehicle);
   }
 
   /**
