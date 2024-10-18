@@ -39,6 +39,22 @@ public class BusTest {
   }
 
   /**
+   * Creates an alternate stop list for the bus.
+   *
+   * @return List of stops.
+   */
+  public List<Stop> createAlternateStops() {
+    Stop stop1 = new Stop(0, "test stop 1", new Position(-93.0, 44.0));
+    Stop stop2 = new Stop(1, "test stop 2", new Position(-93.1, 44.1));
+    Stop stop3 = new Stop(2, "test stop 3", new Position(-93.2, 44.2));
+    List<Stop> stops = new ArrayList<>();
+    stops.add(stop1);
+    stops.add(stop2);
+    stops.add(stop3);
+    return stops;
+  }
+
+  /**
    * Create the out test route for the bus. The route has three stops, and the distance
    * from each stop is added to the list of distances. The probabilities of passengers
    * getting on the bus at each stop are added to the list of probabilities.
@@ -376,12 +392,17 @@ public class BusTest {
     assertEquals(1, testRouteOut.getStops().get(2).getPassengers().size()); // 1 left at the stop
 
     // Move the bus through the inbound route (no more loading should occur)
-    bus.move(); // Stop 3 (inbound start) -> Stop 2
+    bus.move(); // Stop 3 (outbound end) -> Stop 3 (inbound start)
     assertEquals(5, bus.getPassengers().size());
-    bus.move(); // Stop 2 -> Stop 1
+    bus.move(); // Stop 3 -> Stop 2
     assertEquals(5, bus.getPassengers().size());
-    bus.move(); // Stop 1 -> Stop 0 (all passengers should unload)
+    bus.move(); // Stop 2 -> Stop 1 (all passengers should unload)
     assertEquals(0, bus.getPassengers().size());
+
+    // Make sure the passengers are updated correctly
+    List<Integer> expectedWaitAtStop = List.of(0, 0, 0, 0, 0, 0);
+    List<Integer> expectedTimeOnVehicle = List.of(6, 5, 4, 6, 5, 0);
+    checkPassengerUpdates(passengers, expectedWaitAtStop, expectedTimeOnVehicle);
   }
 
 
@@ -390,6 +411,8 @@ public class BusTest {
    */
   @Test
   public void testUpdate() {
+    // Use alternate stops to make update tests different from move tests
+    this.stops = createAlternateStops();
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
     Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
@@ -397,20 +420,20 @@ public class BusTest {
     // NOTE: When the bus is created, the bus position is set to the first stop,
     // but the bus is not actually at the first stop since the first stop in the route is
     // also set as the next stop.
-    assertEquals(-93.243774, bus.getPosition().getLongitude());
-    assertEquals(44.972392, bus.getPosition().getLatitude());
+    assertEquals(-93.0, bus.getPosition().getLongitude());
+    assertEquals(44.0, bus.getPosition().getLatitude());
     // Test the next stop is the first stop in the route.
     assertEquals(testRouteOut.getStops().getFirst(), bus.getNextStop());
     bus.update();
     // Bus currently at outbound test stop 1
-    assertEquals(-93.243774, bus.getPosition().getLongitude());
-    assertEquals(44.972392, bus.getPosition().getLatitude());
+    assertEquals(-93.0, bus.getPosition().getLongitude());
+    assertEquals(44.0, bus.getPosition().getLatitude());
     // Test the next stop is the second stop in the route.
     assertEquals(testRouteOut.getStops().get(1), bus.getNextStop());
     bus.update();
     // Bus currently at outbound test stop 2
-    assertEquals(-93.235071, bus.getPosition().getLongitude());
-    assertEquals(44.973580, bus.getPosition().getLatitude());
+    assertEquals(-93.1, bus.getPosition().getLongitude());
+    assertEquals(44.1, bus.getPosition().getLatitude());
     // Test the next stop is the third stop in the route.
     assertEquals(testRouteOut.getStops().get(2), bus.getNextStop());
   }
@@ -422,35 +445,33 @@ public class BusTest {
   public void testUpdateHandlesPassengersCorrectly() {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    List<Passenger> passengers = createPassengers(6);
+    List<Passenger> passengers = createPassengers(4);
 
-    // Add passengers to the stops
-    addPassengersToStops(testRouteOut.getStops(), passengers);
+    Bus bus = new Bus(0, testRouteOut, testRouteIn, 3, 1);
 
-    Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
+    // Update the bus through the outbound route. No passengers should be loaded.
+    bus.update(); // Stop 0 -> Stop 1 (no passengers loaded)
+    assertEquals(0, bus.getPassengers().size());
+    bus.update(); // Stop 1 -> Stop 2 (no passengers loaded)
+    assertEquals(0, bus.getPassengers().size());
+    bus.update(); // Stop 2 -> Stop 3 (loads no passengers)
+    assertEquals(0, bus.getPassengers().size());
 
-    // Update the bus through the outbound route
-    bus.update(); // Stop 0 -> Stop 1 (loads 1 passenger)
+    // Add passengers to the first two stops of the inbound route
+    addPassengersToStops(testRouteIn.getStops().subList(0, 2), passengers);
+
+    // Bus switches to the inbound route
+    bus.update(); // Stop 3 (outbound end) -> Stop 3 (inbound start) (loads 2 passengers)
     assertEquals(2, bus.getPassengers().size());
-    bus.update(); // Stop 1 -> Stop 2 (loads 2 passengers, total 3)
-    assertEquals(4, bus.getPassengers().size());
-    bus.update(); // Stop 2 -> Stop 3 (loads 2 passengers, reaches capacity 5)
-    assertEquals(5, bus.getPassengers().size());
-
-    // Check that the bus doesn't load more than its capacity
-    assertEquals(1, testRouteOut.getStops().get(2).getPassengers().size()); // 1 left at the stop
-
-    // Update the bus through the inbound route (no more loading should occur)
-    bus.update(); // Stop 3 (inbound start) -> Stop 2
-    assertEquals(5, bus.getPassengers().size());
-    bus.update(); // Stop 2 -> Stop 1
-    assertEquals(5, bus.getPassengers().size());
-    bus.update(); // Stop 1 -> Stop 0 (all passengers should unload)
+    bus.update(); // Stop 3 -> Stop 2 (loads 1 passenger, reaches capacity 3)
+    assertEquals(3, bus.getPassengers().size());
+    assertEquals(1, testRouteIn.getStops().get(1).getPassengers().size()); // 1 left at the stop
+    bus.update(); // Stop 2 -> Stop 1 (all passengers should unload)
     assertEquals(0, bus.getPassengers().size());
 
     // Make sure the passengers are updated correctly
-    List<Integer> expectedWaitAtStop = List.of(0, 0, 0, 0, 0, 0);
-    List<Integer> expectedTimeOnVehicle = List.of(6, 5, 4, 6, 5, 0);
+    List<Integer> expectedWaitAtStop = List.of(0, 0, 0, 0);
+    List<Integer> expectedTimeOnVehicle = List.of(3, 2, 3, 0);
     checkPassengerUpdates(passengers, expectedWaitAtStop, expectedTimeOnVehicle);
   }
 

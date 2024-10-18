@@ -39,6 +39,22 @@ public class TrainTest {
   }
 
   /**
+   * Creates an alternate stop list for the train.
+   *
+   * @return List of stops.
+   */
+  public List<Stop> createAlternateStops() {
+    Stop stop1 = new Stop(0, "test stop 1", new Position(-93.0, 44.0));
+    Stop stop2 = new Stop(1, "test stop 2", new Position(-93.1, 44.1));
+    Stop stop3 = new Stop(2, "test stop 3", new Position(-93.2, 44.2));
+    List<Stop> stops = new ArrayList<>();
+    stops.add(stop1);
+    stops.add(stop2);
+    stops.add(stop3);
+    return stops;
+  }
+
+  /**
    * Create the out test route for the train. The route has three stops, and the distance
    * from each stop is added to the list of distances. The probabilities of passengers
    * getting on the train at each stop are added to the list of probabilities.
@@ -376,12 +392,17 @@ public class TrainTest {
     assertEquals(1, testRouteOut.getStops().get(2).getPassengers().size()); // 1 left at the stop
 
     // Move the train through the inbound route (no more loading should occur)
-    train.move(); // Stop 3 (inbound start) -> Stop 2
+    train.move(); // Stop 3 (outbound end) -> Stop 3 (inbound start)
     assertEquals(5, train.getPassengers().size());
-    train.move(); // Stop 2 -> Stop 1
+    train.move(); // Stop 3 -> Stop 2
     assertEquals(5, train.getPassengers().size());
-    train.move(); // Stop 1 -> Stop 0 (all passengers should unload)
+    train.move(); // Stop 2 -> Stop 1 (all passengers should unload)
     assertEquals(0, train.getPassengers().size());
+
+    // Make sure the passengers are updated correctly
+    List<Integer> expectedWaitAtStop = List.of(0, 0, 0, 0, 0, 0);
+    List<Integer> expectedTimeOnVehicle = List.of(6, 5, 4, 6, 5, 0);
+    checkPassengerUpdates(passengers, expectedWaitAtStop, expectedTimeOnVehicle);
   }
 
 
@@ -390,6 +411,8 @@ public class TrainTest {
    */
   @Test
   public void testUpdate() {
+    // Use alternate stops to make update tests different from move tests
+    this.stops = createAlternateStops();
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
     Train train = new Train(0, testRouteOut, testRouteIn, 5, 1);
@@ -397,20 +420,20 @@ public class TrainTest {
     // NOTE: When the train is created, the train position is set to the first stop,
     // but the train is not actually at the first stop since the first stop in the route is
     // also set as the next stop.
-    assertEquals(-93.243774, train.getPosition().getLongitude());
-    assertEquals(44.972392, train.getPosition().getLatitude());
+    assertEquals(-93.0, train.getPosition().getLongitude());
+    assertEquals(44.0, train.getPosition().getLatitude());
     // Test the next stop is the first stop in the route.
     assertEquals(testRouteOut.getStops().getFirst(), train.getNextStop());
     train.update();
     // Train currently at outbound test stop 1
-    assertEquals(-93.243774, train.getPosition().getLongitude());
-    assertEquals(44.972392, train.getPosition().getLatitude());
+    assertEquals(-93.0, train.getPosition().getLongitude());
+    assertEquals(44.0, train.getPosition().getLatitude());
     // Test the next stop is the second stop in the route.
     assertEquals(testRouteOut.getStops().get(1), train.getNextStop());
     train.update();
     // Train currently at outbound test stop 2
-    assertEquals(-93.235071, train.getPosition().getLongitude());
-    assertEquals(44.973580, train.getPosition().getLatitude());
+    assertEquals(-93.1, train.getPosition().getLongitude());
+    assertEquals(44.1, train.getPosition().getLatitude());
     // Test the next stop is the third stop in the route.
     assertEquals(testRouteOut.getStops().get(2), train.getNextStop());
   }
@@ -422,35 +445,33 @@ public class TrainTest {
   public void testUpdateHandlesPassengersCorrectly() {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    List<Passenger> passengers = createPassengers(6);
+    List<Passenger> passengers = createPassengers(4);
 
-    // Add passengers to the stops
-    addPassengersToStops(testRouteOut.getStops(), passengers);
+    Train train = new Train(0, testRouteOut, testRouteIn, 3, 1);
 
-    Train train = new Train(0, testRouteOut, testRouteIn, 5, 1);
+    // Update the train through the outbound route. No passengers should be loaded.
+    train.update(); // Stop 0 -> Stop 1 (no passengers loaded)
+    assertEquals(0, train.getPassengers().size());
+    train.update(); // Stop 1 -> Stop 2 (no passengers loaded)
+    assertEquals(0, train.getPassengers().size());
+    train.update(); // Stop 2 -> Stop 3 (loads no passengers)
+    assertEquals(0, train.getPassengers().size());
 
-    // Update the train through the outbound route
-    train.update(); // Stop 0 -> Stop 1 (loads 1 passenger)
+    // Add passengers to the first two stops of the inbound route
+    addPassengersToStops(testRouteIn.getStops().subList(0, 2), passengers);
+
+    // Train switches to the inbound route
+    train.update(); // Stop 3 (outbound end) -> Stop 3 (inbound start) (loads 2 passengers)
     assertEquals(2, train.getPassengers().size());
-    train.update(); // Stop 1 -> Stop 2 (loads 2 passengers, total 3)
-    assertEquals(4, train.getPassengers().size());
-    train.update(); // Stop 2 -> Stop 3 (loads 2 passengers, reaches capacity 5)
-    assertEquals(5, train.getPassengers().size());
-
-    // Check that the train doesn't load more than its capacity
-    assertEquals(1, testRouteOut.getStops().get(2).getPassengers().size()); // 1 left at the stop
-
-    // Update the train through the inbound route (no more loading should occur)
-    train.update(); // Stop 3 (inbound start) -> Stop 2
-    assertEquals(5, train.getPassengers().size());
-    train.update(); // Stop 2 -> Stop 1
-    assertEquals(5, train.getPassengers().size());
-    train.update(); // Stop 1 -> Stop 0 (all passengers should unload)
+    train.update(); // Stop 3 -> Stop 2 (loads 1 passenger, reaches capacity 3)
+    assertEquals(3, train.getPassengers().size());
+    assertEquals(1, testRouteIn.getStops().get(1).getPassengers().size()); // 1 left at the stop
+    train.update(); // Stop 2 -> Stop 1 (all passengers should unload)
     assertEquals(0, train.getPassengers().size());
 
     // Make sure the passengers are updated correctly
-    List<Integer> expectedWaitAtStop = List.of(0, 0, 0, 0, 0, 0);
-    List<Integer> expectedTimeOnVehicle = List.of(6, 5, 4, 6, 5, 0);
+    List<Integer> expectedWaitAtStop = List.of(0, 0, 0, 0);
+    List<Integer> expectedTimeOnVehicle = List.of(3, 2, 3, 0);
     checkPassengerUpdates(passengers, expectedWaitAtStop, expectedTimeOnVehicle);
   }
 
