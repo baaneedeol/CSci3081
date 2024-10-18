@@ -1,6 +1,7 @@
 package edu.umn.cs.csci3081w.project.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayOutputStream;
@@ -62,6 +63,27 @@ public class StopTest {
     Route testRouteIn = new Route(11, "testLine", "BUS", "testRouteIn",
         stopsIn, distancesIn, generatorIn);
     return new Bus(0, testRouteOut, testRouteIn, 5, 1);
+  }
+
+  /**
+   * Get the string output of the report method for a passenger.
+   * @param passenger Passenger to get the report for.
+   * @return String output of the report method.
+   */
+  private String getPassengerReport(Passenger passenger) {
+    try {
+      // Open a stream to capture the output of the report method.
+      final Charset charset = StandardCharsets.UTF_8;
+      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+      PrintStream testStream = new PrintStream(outputStream, true, charset.name());
+      passenger.report(testStream);
+      String output = outputStream.toString(charset);
+      testStream.close();
+      outputStream.close();
+      return output;
+    } catch (IOException ioe) {
+      return "";
+    }
   }
 
   /**
@@ -232,5 +254,30 @@ public class StopTest {
     } catch (IOException ioe) {
       fail();
     }
+  }
+
+  /**
+   * Test that the update method updates the passengers waiting at the stop.
+   */
+  @Test
+  public void testUpdate() {
+    Stop stop = new Stop(0, "test stop", new Position(-93.243774, 44.972392));
+    Passenger passenger1 = new Passenger(1, "Goldy");
+    Passenger passenger2 = new Passenger(2, "Gopher");
+    stop.addPassengers(passenger1);
+    stop.addPassengers(passenger2);
+
+    // Call update and check that the passengers' wait times have increased.
+    stop.update();
+    String passenger1Report = getPassengerReport(passenger1);
+    String passenger2Report = getPassengerReport(passenger2);
+    assertTrue(passenger1Report.contains("Wait at stop: 1"));
+    assertTrue(passenger2Report.contains("Wait at stop: 1"));
+
+    stop.update();
+    passenger1Report = getPassengerReport(passenger1);
+    passenger2Report = getPassengerReport(passenger2);
+    assertTrue(passenger1Report.contains("Wait at stop: 2"));
+    assertTrue(passenger2Report.contains("Wait at stop: 2"));
   }
 }
