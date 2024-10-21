@@ -141,6 +141,15 @@ public class Train extends Vehicle {
   }
 
   /**
+   * Calculates the amount of CO2 consumed by the train.
+   *
+   * @return the amount of CO2 consumed by the train
+   */
+  public int co2Consumption() {
+    return this.getPassengers().size() * 3 + 6;
+  }
+
+  /**
    * Unloads passengers at the next stop.
    *
    * @return the number of passengers unloaded

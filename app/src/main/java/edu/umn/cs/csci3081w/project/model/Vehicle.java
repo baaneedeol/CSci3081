@@ -72,6 +72,13 @@ public abstract class Vehicle {
   public abstract void update();
 
   /**
+   * Calculates the CO2 consumption of the vehicle.
+   *
+   * @return the CO2 consumption
+   */
+  public abstract int co2Consumption();
+
+  /**
    * Gets the vehicle's identifier.
    *
    * @return the vehicle identifier
@@ -88,7 +95,6 @@ public abstract class Vehicle {
   public int getCapacity() {
     return capacity;
   }
-
 
   /**
    * Gets the vehicle's speed.

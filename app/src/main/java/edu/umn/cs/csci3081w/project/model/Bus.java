@@ -141,6 +141,15 @@ public class Bus extends Vehicle {
   }
 
   /**
+   * Calculates the amount of CO2 consumed by the bus.
+   *
+   * @return the amount of CO2 consumed by the bus
+   */
+  public int co2Consumption() {
+    return this.getPassengers().size() * 2 + 4;
+  }
+
+  /**
    * Unloads passengers from the bus at the current stop.
    *
    * @return the number of passengers successfully unloaded
