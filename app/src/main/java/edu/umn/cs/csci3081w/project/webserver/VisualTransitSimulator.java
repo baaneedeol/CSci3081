@@ -20,6 +20,7 @@ public class VisualTransitSimulator {
   private List<Vehicle> completedTripVehicles;
   private List<Integer> vehicleStartTimings;
   private List<Integer> timeSinceLastVehicle;
+  private boolean paused = false;
 
   /**
    * Constructor for Simulation.
@@ -62,6 +63,9 @@ public class VisualTransitSimulator {
    * Updates the simulation at each step.
    */
   public void update() {
+    if (paused) {
+      return;
+    }
     simulationTimeElapsed++;
     if (simulationTimeElapsed > numTimeSteps) {
       return;
@@ -120,5 +124,9 @@ public class VisualTransitSimulator {
 
   public List<Vehicle> getActiveVehicles() {
     return activeVehicles;
+  }
+
+  public void togglePause() {
+    paused = !paused;
   }
 }
