@@ -62,7 +62,8 @@ public class StopTest {
     PassengerGenerator generatorIn = new RandomPassengerGenerator(stopsIn, probabilitiesIn);
     Route testRouteIn = new Route(11, "testLine", "BUS", "testRouteIn",
         stopsIn, distancesIn, generatorIn);
-    return new Bus(0, testRouteOut, testRouteIn, 5, 1);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    return new Bus(0,testLine, 5, 1);
   }
 
   /**

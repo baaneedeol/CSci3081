@@ -168,7 +168,8 @@ public class TrainTest {
   public void testConstructorNormal() {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Train train = new Train(0, testRouteOut, testRouteIn, 5, 1);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Train train = new Train(0, testLine, 5, 1);
     assertEquals(0, train.getId());
     assertEquals(5, train.getCapacity());
     assertEquals(1, train.getSpeed());
@@ -189,7 +190,8 @@ public class TrainTest {
     try {
       Route testRouteOut = createTestOutRoute();
       Route testRouteIn = createTestInRoute();
-      Train train = new Train(0, testRouteOut, testRouteIn, 5, 1);
+      Line testLine = new Line(testRouteOut, testRouteIn);
+      Train train = new Train(0, testLine, 5, 1);
       // Stream to capture the output of the report method.
       final Charset charset = StandardCharsets.UTF_8;
       ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -225,7 +227,8 @@ public class TrainTest {
     try {
       Route testRouteOut = createTestOutRoute();
       Route testRouteIn = createTestInRoute();
-      Train train = new Train(0, testRouteOut, testRouteIn, 5, 1);
+      Line testLine = new Line(testRouteOut, testRouteIn);
+      Train train = new Train(0, testLine, 5, 1);
       // Add a passenger to the train as it's info should be reported.
       Passenger passenger = new Passenger(1, "Goldy");
       train.loadPassenger(passenger);
@@ -268,7 +271,8 @@ public class TrainTest {
   public void testIsTripComplete() {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Train train = new Train(0, testRouteOut, testRouteIn, 5, 1);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Train train = new Train(0, testLine, 5, 1);
     // Train currently at start of outbound (stop 0)
     assertFalse(train.isTripComplete());
     train.move();
@@ -301,7 +305,8 @@ public class TrainTest {
   public void testLoadPassenger(int passengerCount) {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Train train = new Train(0, testRouteOut, testRouteIn, 5, 1);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Train train = new Train(0, testLine, 5, 1);
     List<Passenger> passengers = createPassengers(passengerCount);
 
     int loadedCount = 0;
@@ -321,7 +326,8 @@ public class TrainTest {
   public void testUnloadPassengersAtStop() {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Train train = new Train(0, testRouteOut, testRouteIn, 5, 1);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Train train = new Train(0, testLine, 5, 1);
 
     List<Passenger> passengers = createPassengers(3);
     train.getPassengers().addAll(passengers); // Directly add passengers to the train
@@ -340,7 +346,8 @@ public class TrainTest {
   public void testMove() {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Train train = new Train(0, testRouteOut, testRouteIn, 5, 1);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Train train = new Train(0, testLine, 5, 1);
     // Train currently at start of outbound (stop 0)
     // NOTE: When the train is created, the train position is set to the first stop,
     // but the train is not actually at the first stop since the first stop in the route is
@@ -378,7 +385,8 @@ public class TrainTest {
     // Add passengers to the stops
     addPassengersToStops(testRouteOut.getStops(), passengers);
 
-    Train train = new Train(0, testRouteOut, testRouteIn, 5, 1);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Train train = new Train(0, testLine, 5, 1);
 
     // Move the train through the outbound route
     train.move(); // Stop 0 -> Stop 1 (loads 1 passenger)
@@ -415,7 +423,8 @@ public class TrainTest {
     this.stops = createAlternateStops();
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Train train = new Train(0, testRouteOut, testRouteIn, 5, 1);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Train train = new Train(0, testLine, 5, 1);
     // Train currently at start of outbound (stop 0)
     // NOTE: When the train is created, the train position is set to the first stop,
     // but the train is not actually at the first stop since the first stop in the route is
@@ -447,7 +456,8 @@ public class TrainTest {
     Route testRouteIn = createTestInRoute();
     List<Passenger> passengers = createPassengers(4);
 
-    Train train = new Train(0, testRouteOut, testRouteIn, 3, 1);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Train train = new Train(0, testLine, 3, 1);
 
     // Update the train through the outbound route. No passengers should be loaded.
     train.update(); // Stop 0 -> Stop 1 (no passengers loaded)
@@ -483,7 +493,8 @@ public class TrainTest {
   public void testRouteSwitching() {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Train train = new Train(0, testRouteOut, testRouteIn, 5, 1);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Train train = new Train(0, testLine, 5, 1);
 
     // Move the train to the end of the outbound route
     for (int i = 0; i < testRouteOut.getStops().size(); i++) {
@@ -507,7 +518,8 @@ public class TrainTest {
   public void testMoveWithDifferentSpeeds(double speed) {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Train train = new Train(0, testRouteOut, testRouteIn, 5, speed);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Train train = new Train(0, testLine, 5, speed);
 
     train.move(); // Move to first stop
 

@@ -2,12 +2,21 @@ package edu.umn.cs.csci3081w.project.model;
 
 import java.io.PrintStream;
 
+/**
+ * Represents a bus in the transit simulation.
+ * The bus follows a specific line and can load and unload passengers at stops.
+ */
 public class Bus extends Vehicle {
+
+  /** Constant for the bus vehicle type. */
   public static final String BUS_VEHICLE = "BUS_VEHICLE";
+
+  /** Default speed of the bus in units per second. */
   public static final double SPEED = 0.5;
+
+  /** Default capacity of the bus. */
   public static final int CAPACITY = 60;
-  private Route outboundRoute;
-  private Route inboundRoute;
+  private Line line;
   private double distanceRemaining;
   private Stop nextStop;
 
@@ -15,20 +24,18 @@ public class Bus extends Vehicle {
    * Constructor for a bus.
    *
    * @param id       bus identifier
-   * @param out      outbound route
-   * @param in       inbound route
+   * @param line     line containing outbound and inbound routes
    * @param capacity capacity of bus
    * @param speed    speed of bus
    */
-  public Bus(int id, Route out, Route in, int capacity, double speed) {
+  public Bus(int id, Line line, int capacity, double speed) {
     super(id, capacity, speed, new PassengerLoader(), new PassengerUnloader());
-    this.outboundRoute = out;
-    this.inboundRoute = in;
+    this.line = line;
     this.distanceRemaining = 0;
-    this.nextStop = out.getNextStop();
-    setName(out.getName() + id);
+    this.nextStop = line.getOutboundRoute().getNextStop();
+    setName(line.getOutboundRoute().getName() + id);
     setPosition(new Position(nextStop.getPosition().getLongitude(),
-        nextStop.getPosition().getLatitude()));
+            nextStop.getPosition().getLatitude()));
   }
 
   /**
@@ -53,10 +60,21 @@ public class Bus extends Vehicle {
     out.println("####Bus Info End####");
   }
 
+  /**
+   * Checks if the trip is complete by verifying if both outbound and inbound routes are at their ends.
+   *
+   * @return true if the trip is complete, false otherwise
+   */
   public boolean isTripComplete() {
-    return outboundRoute.isAtEnd() && inboundRoute.isAtEnd();
+    return line.getOutboundRoute().isAtEnd() && line.getInboundRoute().isAtEnd();
   }
 
+  /**
+   * Loads a new passenger onto the bus.
+   *
+   * @param newPassenger the passenger to load
+   * @return the number of passengers successfully loaded
+   */
   public int loadPassenger(Passenger newPassenger) {
     return getPassengerLoader().loadPassenger(newPassenger, getCapacity(), getPassengers());
   }
@@ -85,13 +103,14 @@ public class Bus extends Vehicle {
     }
 
     // Get the correct route and early exit
-    Route currentRoute = outboundRoute;
-    if (outboundRoute.isAtEnd()) {
-      if (inboundRoute.isAtEnd()) {
+    Route currentRoute = line.getOutboundRoute(); // Update to use line
+    if (line.getOutboundRoute().isAtEnd()) {
+      if (line.getInboundRoute().isAtEnd()) {
         return;
       }
-      currentRoute = inboundRoute;
+      currentRoute = line.getInboundRoute();
     }
+
     Stop prevStop = currentRoute.prevStop();
     Stop nextStop = currentRoute.getNextStop();
     double distanceBetween = currentRoute.getNextStopDistance();
@@ -121,10 +140,20 @@ public class Bus extends Vehicle {
     move();
   }
 
+  /**
+   * Unloads passengers from the bus at the current stop.
+   *
+   * @return the number of passengers successfully unloaded
+   */
   private int unloadPassengers() {
     return getPassengerUnloader().unloadPassengers(getPassengers(), nextStop);
   }
 
+  /**
+   * Handles the arrival of the bus at a bus stop, managing passenger unloading and loading.
+   *
+   * @return the total number of passengers handled (loaded and unloaded)
+   */
   private int handleBusStop() {
     // This function handles arrival at a bus stop
     int passengersHandled = 0;
@@ -143,6 +172,9 @@ public class Bus extends Vehicle {
     return passengersHandled;
   }
 
+  /**
+   * Advances the bus to the next stop on its route.
+   */
   private void toNextStop() {
     //current stop
     currentRoute().nextStop();
@@ -161,6 +193,12 @@ public class Bus extends Vehicle {
     }
   }
 
+  /**
+   * Updates the distance remaining based on the bus's speed.
+   * The bus does not move if it is at the end of the route or if the speed is negative.
+   *
+   * @return the effective speed of the bus
+   */
   private double updateDistance() {
     // Updates the distance remaining and returns the effective speed of the bus
     // Bus does not move if speed is negative or bus is at end of route
@@ -174,14 +212,24 @@ public class Bus extends Vehicle {
     return getSpeed();
   }
 
+  /**
+   * Gets the current route of the bus, determining whether it is on the outbound or inbound route.
+   *
+   * @return the current route the bus is following
+   */
   private Route currentRoute() {
     // Figure out if we're on the outgoing or incoming route
-    if (!outboundRoute.isAtEnd()) {
-      return outboundRoute;
+    if (!line.getOutboundRoute().isAtEnd()) {
+      return line.getOutboundRoute();
     }
-    return inboundRoute;
+    return line.getInboundRoute();
   }
 
+  /**
+   * Gets the next stop the bus will arrive at.
+   *
+   * @return the next stop on the bus's route
+   */
   public Stop getNextStop() {
     return nextStop;
   }

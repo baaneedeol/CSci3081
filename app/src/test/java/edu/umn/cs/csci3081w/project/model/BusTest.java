@@ -168,7 +168,8 @@ public class BusTest {
   public void testConstructorNormal() {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Bus bus = new Bus(0, testLine, 5, 1);
     assertEquals(0, bus.getId());
     assertEquals(5, bus.getCapacity());
     assertEquals(1, bus.getSpeed());
@@ -189,7 +190,8 @@ public class BusTest {
     try {
       Route testRouteOut = createTestOutRoute();
       Route testRouteIn = createTestInRoute();
-      Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
+      Line testLine = new Line(testRouteOut, testRouteIn);
+      Bus bus = new Bus(0, testLine, 5, 1);
       // Stream to capture the output of the report method.
       final Charset charset = StandardCharsets.UTF_8;
       ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -225,7 +227,8 @@ public class BusTest {
     try {
       Route testRouteOut = createTestOutRoute();
       Route testRouteIn = createTestInRoute();
-      Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
+      Line testLine = new Line(testRouteOut, testRouteIn);
+      Bus bus = new Bus(0, testLine, 5, 1);
       // Add a passenger to the bus as it's info should be reported.
       Passenger passenger = new Passenger(1, "Goldy");
       bus.loadPassenger(passenger);
@@ -268,7 +271,8 @@ public class BusTest {
   public void testIsTripComplete() {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Bus bus = new Bus(0, testLine, 5, 1);
     // Bus currently at start of outbound (stop 0)
     assertFalse(bus.isTripComplete());
     bus.move();
@@ -301,7 +305,8 @@ public class BusTest {
   public void testLoadPassenger(int passengerCount) {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Bus bus = new Bus(0, testLine, 5, 1);
     List<Passenger> passengers = createPassengers(passengerCount);
 
     int loadedCount = 0;
@@ -321,7 +326,8 @@ public class BusTest {
   public void testUnloadPassengersAtStop() {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Bus bus = new Bus(0, testLine, 5, 1);
 
     List<Passenger> passengers = createPassengers(3);
     bus.getPassengers().addAll(passengers); // Directly add passengers to the bus
@@ -340,7 +346,8 @@ public class BusTest {
   public void testMove() {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Bus bus = new Bus(0, testLine, 5, 1);
     // Bus currently at start of outbound (stop 0)
     // NOTE: When the bus is created, the bus position is set to the first stop,
     // but the bus is not actually at the first stop since the first stop in the route is
@@ -378,7 +385,8 @@ public class BusTest {
     // Add passengers to the stops
     addPassengersToStops(testRouteOut.getStops(), passengers);
 
-    Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Bus bus = new Bus(0, testLine, 5, 1);
 
     // Move the bus through the outbound route
     bus.move(); // Stop 0 -> Stop 1 (loads 1 passenger)
@@ -415,7 +423,8 @@ public class BusTest {
     this.stops = createAlternateStops();
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Bus bus = new Bus(0, testLine, 5, 1);
     // Bus currently at start of outbound (stop 0)
     // NOTE: When the bus is created, the bus position is set to the first stop,
     // but the bus is not actually at the first stop since the first stop in the route is
@@ -447,7 +456,8 @@ public class BusTest {
     Route testRouteIn = createTestInRoute();
     List<Passenger> passengers = createPassengers(4);
 
-    Bus bus = new Bus(0, testRouteOut, testRouteIn, 3, 1);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Bus bus = new Bus(0, testLine, 3, 1);
 
     // Update the bus through the outbound route. No passengers should be loaded.
     bus.update(); // Stop 0 -> Stop 1 (no passengers loaded)
@@ -483,7 +493,8 @@ public class BusTest {
   public void testRouteSwitching() {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, 1);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Bus bus = new Bus(0, testLine, 5, 1);
 
     // Move the bus to the end of the outbound route
     for (int i = 0; i < testRouteOut.getStops().size(); i++) {
@@ -507,7 +518,8 @@ public class BusTest {
   public void testMoveWithDifferentSpeeds(double speed) {
     Route testRouteOut = createTestOutRoute();
     Route testRouteIn = createTestInRoute();
-    Bus bus = new Bus(0, testRouteOut, testRouteIn, 5, speed);
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Bus bus = new Bus(0, testLine, 5, speed);
 
     bus.move(); // Move to first stop
 

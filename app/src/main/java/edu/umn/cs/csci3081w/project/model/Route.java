@@ -10,7 +10,11 @@ import java.util.List;
  * a list of stops and generates passengers at each stop.
  */
 public class Route {
+
+  /** Constant representing a bus line. */
   public static final String BUS_LINE = "BUS_LINE";
+
+  /** Constant representing a train line. */
   public static final String TRAIN_LINE = "TRAIN_LINE";
   private int id;
   private String lineName;
@@ -112,6 +116,11 @@ public class Route {
     out.println("####Route Info End####");
   }
 
+  /**
+   * Checks if the current position is at the end of the route.
+   *
+   * @return true if the route is at its end, false otherwise
+   */
   public boolean isAtEnd() {
     return nextStopIndex >= stops.size();
   }
