@@ -25,7 +25,7 @@ public class Bus extends Vehicle {
     this.outboundRoute = out;
     this.inboundRoute = in;
     this.distanceRemaining = 0;
-    this.nextStop = out.getDestinationStop();
+    this.nextStop = out.getNextStop();
     setName(out.getName() + id);
     setPosition(new Position(nextStop.getPosition().getLongitude(),
         nextStop.getPosition().getLatitude()));
@@ -93,7 +93,7 @@ public class Bus extends Vehicle {
       currentRoute = inboundRoute;
     }
     Stop prevStop = currentRoute.prevStop();
-    Stop nextStop = currentRoute.getDestinationStop();
+    Stop nextStop = currentRoute.getNextStop();
     double distanceBetween = currentRoute.getNextStopDistance();
     // the ratio shows us how far from the previous stop are we in a ratio from 0 to 1
     double ratio;
@@ -149,7 +149,7 @@ public class Bus extends Vehicle {
     if (!isTripComplete()) {
       // it's important we call currentRoute() again,
       // as nextStop() may have caused it to change.
-      nextStop = currentRoute().getDestinationStop();
+      nextStop = currentRoute().getNextStop();
       distanceRemaining +=
           currentRoute().getNextStopDistance();
       // note, if distanceRemaining was negative because we

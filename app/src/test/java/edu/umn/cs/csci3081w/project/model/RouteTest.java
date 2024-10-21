@@ -100,8 +100,8 @@ public class RouteTest {
     assertEquals("BUS", testRoute.getLineType());
     assertEquals("testRoute", testRoute.getName());
     assertEquals(stops, testRoute.getStops()); // Check if stops are the same
-    assertEquals(0, testRoute.getDestinationStopIndex());
-    assertEquals(stops.get(0), testRoute.getDestinationStop());
+    assertEquals(0, testRoute.getNextStopIndex());
+    assertEquals(stops.get(0), testRoute.getNextStop());
   }
 
   /**
@@ -117,14 +117,14 @@ public class RouteTest {
     assertEquals(testRoute.getLineType(), shallowCopyRoute.getLineType());
     assertEquals(testRoute.getName(), shallowCopyRoute.getName());
     assertEquals(testRoute.getStops(), shallowCopyRoute.getStops()); // Shallow copy, same stops
-    assertEquals(testRoute.getDestinationStopIndex(),
-        shallowCopyRoute.getDestinationStopIndex());
-    assertEquals(testRoute.getDestinationStop(), shallowCopyRoute.getDestinationStop());
+    assertEquals(testRoute.getNextStopIndex(),
+        shallowCopyRoute.getNextStopIndex());
+    assertEquals(testRoute.getNextStop(), shallowCopyRoute.getNextStop());
 
     // Modify the original route and check that the shallow copy reflects the changes
     testRoute.nextStop();
-    assertNotEquals(testRoute.getDestinationStopIndex(),
-        shallowCopyRoute.getDestinationStopIndex()); // Should be different
+    assertNotEquals(testRoute.getNextStopIndex(),
+        shallowCopyRoute.getNextStopIndex()); // Should be different
   }
 
   /**
@@ -298,21 +298,21 @@ public class RouteTest {
   public void testNextStop() {
     Route testRoute = createTestRoute();
     // Check initially at the first stop.
-    assertEquals(0, testRoute.getDestinationStopIndex());
-    assertEquals(stops.get(0), testRoute.getDestinationStop());
+    assertEquals(0, testRoute.getNextStopIndex());
+    assertEquals(stops.get(0), testRoute.getNextStop());
 
     // Move to the second stop.
     testRoute.nextStop();
-    assertEquals(1, testRoute.getDestinationStopIndex());
-    assertEquals(stops.get(1), testRoute.getDestinationStop());
+    assertEquals(1, testRoute.getNextStopIndex());
+    assertEquals(stops.get(1), testRoute.getNextStop());
 
     // Move to the end of the route.
     for (int i = 0; i < testRoute.getStops().size(); i++) {
       testRoute.nextStop();
     }
     // Index is always incremented in nextStop.
-    assertEquals(4, testRoute.getDestinationStopIndex());
-    assertEquals(stops.get(2), testRoute.getDestinationStop()); // Destination remains the last.
+    assertEquals(4, testRoute.getNextStopIndex());
+    assertEquals(stops.get(2), testRoute.getNextStop()); // Destination remains the last.
   }
 
   /**
@@ -321,10 +321,10 @@ public class RouteTest {
   @Test
   public void testGetDestinationStop() {
     Route testRoute = createTestRoute();
-    assertEquals(stops.get(0), testRoute.getDestinationStop());
+    assertEquals(stops.get(0), testRoute.getNextStop());
 
     testRoute.nextStop();
-    assertEquals(stops.get(1), testRoute.getDestinationStop());
+    assertEquals(stops.get(1), testRoute.getNextStop());
   }
 
   /**

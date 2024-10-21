@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Represents a route for a public transportation system, which includes
+ * a list of stops and generates passengers at each stop.
+ */
 public class Route {
   public static final String BUS_LINE = "BUS_LINE";
   public static final String TRAIN_LINE = "TRAIN_LINE";
@@ -14,8 +18,8 @@ public class Route {
   private String name;
   private List<Stop> stops = new ArrayList<Stop>();
   private List<Double> distances = new ArrayList<Double>();
-  private int destinationStopIndex;
-  private Stop destinationStop;
+  private int nextStopIndex;
+  private Stop nextStop;
   private PassengerGenerator generator;
 
   /**
@@ -42,8 +46,8 @@ public class Route {
       this.distances.add(distances.get(i));
     }
     this.generator = generator;
-    this.destinationStopIndex = 0;
-    this.destinationStop = stops.get(0);
+    this.nextStopIndex = 0;
+    this.nextStop = stops.get(0);
   }
 
   /**
@@ -95,11 +99,11 @@ public class Route {
     out.println("****Stops Info Start****");
     //calling all Stop's report methods
     while (stopIter.hasNext()) {
-      if (stopCounter == this.destinationStopIndex) {
+      if (stopCounter == this.nextStopIndex) {
         out.println("++++Next Stop Info Start++++");
       }
       stopIter.next().report(out);
-      if (stopCounter == this.destinationStopIndex) {
+      if (stopCounter == this.nextStopIndex) {
         out.println("++++Next Stop Info End++++");
       }
       stopCounter++;
@@ -109,7 +113,7 @@ public class Route {
   }
 
   public boolean isAtEnd() {
-    return destinationStopIndex >= stops.size();
+    return nextStopIndex >= stops.size();
   }
 
   /**
@@ -118,10 +122,10 @@ public class Route {
    * @return previous stop
    */
   public Stop prevStop() {
-    if (destinationStopIndex == 0) {
+    if (nextStopIndex == 0) {
       return this.stops.get(0);
-    } else if (destinationStopIndex < stops.size()) {
-      return this.stops.get(destinationStopIndex - 1);
+    } else if (nextStopIndex < stops.size()) {
+      return this.stops.get(nextStopIndex - 1);
     } else {
       return this.stops.get(stops.size() - 1);
     }
@@ -131,11 +135,11 @@ public class Route {
    * Updates destinationStop to next stop.
    */
   public void nextStop() {
-    destinationStopIndex++;
-    if (destinationStopIndex < stops.size()) {
-      destinationStop = stops.get(destinationStopIndex);
+    nextStopIndex++;
+    if (nextStopIndex < stops.size()) {
+      nextStop = stops.get(nextStopIndex);
     } else {
-      destinationStop = stops.get(stops.size() - 1);
+      nextStop = stops.get(stops.size() - 1);
     }
   }
 
@@ -144,8 +148,8 @@ public class Route {
    *
    * @return destination Stop
    */
-  public Stop getDestinationStop() {
-    return destinationStop;
+  public Stop getNextStop() {
+    return nextStop;
   }
 
   /**
@@ -154,8 +158,8 @@ public class Route {
    * @return distance
    */
   public Double getNextStopDistance() {
-    if (destinationStopIndex > 0) {
-      return distances.get(destinationStopIndex - 1);
+    if (nextStopIndex > 0) {
+      return distances.get(nextStopIndex - 1);
     } else {
       return 0.0;
     }
@@ -171,26 +175,56 @@ public class Route {
     return this.generator.generatePassengers();
   }
 
+  /**
+   * Returns the identifier of the route.
+   *
+   * @return the route ID
+   */
   public int getId() {
     return id;
   }
 
+  /**
+   * Returns the name of the route.
+   *
+   * @return the name of the route
+   */
   public String getName() {
     return name;
   }
 
+  /**
+   * Returns the list of stops on the route.
+   *
+   * @return the list of Stop objects
+   */
   public List<Stop> getStops() {
     return stops;
   }
 
-  public int getDestinationStopIndex() {
-    return destinationStopIndex;
+  /**
+   * Returns the index of the next stop.
+   *
+   * @return the index of the next stop
+   */
+  public int getNextStopIndex() {
+    return nextStopIndex;
   }
 
+  /**
+   * Returns the name of the line associated with this route.
+   *
+   * @return the name of the line
+   */
   public String getLineName() {
     return lineName;
   }
 
+  /**
+   * Returns the type of the line associated with this route.
+   *
+   * @return the type of the line
+   */
   public String getLineType() {
     return lineType;
   }
