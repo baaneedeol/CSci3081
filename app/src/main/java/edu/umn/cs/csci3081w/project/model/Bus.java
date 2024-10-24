@@ -141,9 +141,9 @@ public class Bus extends Vehicle {
   }
 
   /**
-   * Calculates the amount of CO2 consumed by the bus.
+   * Calculates the amount of CO2 consumed by the bus and passengers.
    *
-   * @return the amount of CO2 consumed by the bus
+   * @return the amount of CO2 consumed by the bus and passengers.
    */
   public int co2Consumption() {
     return this.getPassengers().size() * 2 + 4;

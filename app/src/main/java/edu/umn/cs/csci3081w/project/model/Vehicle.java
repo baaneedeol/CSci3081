@@ -72,9 +72,9 @@ public abstract class Vehicle {
   public abstract void update();
 
   /**
-   * Calculates the CO2 consumption of the vehicle.
+   * Calculates the CO2 consumption of the vehicle and passengers.
    *
-   * @return the CO2 consumption
+   * @return the CO2 consumption.
    */
   public abstract int co2Consumption();
 
