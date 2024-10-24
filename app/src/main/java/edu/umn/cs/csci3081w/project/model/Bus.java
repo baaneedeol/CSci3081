@@ -61,7 +61,8 @@ public class Bus extends Vehicle {
   }
 
   /**
-   * Checks if the trip is complete by verifying if both outbound and inbound routes are at their ends.
+   * Checks if the trip is complete by verifying if both outbound and
+   * inbound routes are at their ends.
    *
    * @return true if the trip is complete, false otherwise
    */

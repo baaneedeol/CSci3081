@@ -9,13 +9,19 @@ import java.io.PrintStream;
  */
 public class Train extends Vehicle {
 
-  /** Constant representing the train vehicle type. */
+  /**
+   * Constant representing the train vehicle type.
+   */
   public static final String TRAIN_VEHICLE = "TRAIN_VEHICLE";
 
-  /** Default speed of the train (in some unit, e.g., km/h). */
+  /**
+   * Default speed of the train (in some unit, e.g., km/h).
+   */
   public static final double SPEED = 1;
 
-  /** Maximum capacity of the train. */
+  /**
+   * Maximum capacity of the train.
+   */
   public static final int CAPACITY = 120;
   private Line line;
   private double distanceRemaining;
@@ -36,7 +42,7 @@ public class Train extends Vehicle {
     this.nextStop = line.getOutboundRoute().getNextStop();
     setName(line.getOutboundRoute().getName() + id);
     setPosition(new Position(nextStop.getPosition().getLongitude(),
-            nextStop.getPosition().getLatitude()));
+        nextStop.getPosition().getLatitude()));
   }
 
   /**
@@ -62,13 +68,15 @@ public class Train extends Vehicle {
   }
 
   /**
-   * Checks if the trip is complete, which occurs when both outbound and inbound routes have been completed.
+   * Checks if the trip is complete, which occurs when both outbound and
+   * inbound routes have been completed.
    *
    * @return true if the trip is complete, false otherwise
    */
   public boolean isTripComplete() {
     return line.getOutboundRoute().isAtEnd() && line.getInboundRoute().isAtEnd();
   }
+
   /**
    * Loads a new passenger onto the train.
    *
@@ -232,6 +240,7 @@ public class Train extends Vehicle {
     }
     return line.getInboundRoute();
   }
+
   /**
    * Gets the next stop the train will approach.
    *

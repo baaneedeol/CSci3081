@@ -2,10 +2,10 @@ package edu.umn.cs.csci3081w.project.webserver;
 
 import edu.umn.cs.csci3081w.project.model.Bus;
 import edu.umn.cs.csci3081w.project.model.Counter;
+import edu.umn.cs.csci3081w.project.model.Line;
 import edu.umn.cs.csci3081w.project.model.Route;
 import edu.umn.cs.csci3081w.project.model.Train;
 import edu.umn.cs.csci3081w.project.model.Vehicle;
-import edu.umn.cs.csci3081w.project.model.Line;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,7 +87,10 @@ public class VisualTransitSimulator {
         } else if (outbound.getLineType().equals(Route.TRAIN_LINE)
             && inbound.getLineType().equals(Route.TRAIN_LINE)) {
           activeVehicles
-              .add(new Train(counter.getTrainIdCounterAndIncrement(), line, Train.CAPACITY, Train.SPEED));
+              .add(new Train(counter.getTrainIdCounterAndIncrement(),
+                          line,
+                          Train.CAPACITY,
+                          Train.SPEED));
           timeSinceLastVehicle.set(i, vehicleStartTimings.get(i));
           timeSinceLastVehicle.set(i, timeSinceLastVehicle.get(i) - 1);
         }

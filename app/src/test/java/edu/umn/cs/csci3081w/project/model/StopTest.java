@@ -63,7 +63,7 @@ public class StopTest {
     Route testRouteIn = new Route(11, "testLine", "BUS", "testRouteIn",
         stopsIn, distancesIn, generatorIn);
     Line testLine = new Line(testRouteOut, testRouteIn);
-    return new Bus(0,testLine, 5, 1);
+    return new Bus(0, testLine, 5, 1);
   }
 
   /**
