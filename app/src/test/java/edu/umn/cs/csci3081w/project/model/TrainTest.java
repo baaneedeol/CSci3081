@@ -538,4 +538,28 @@ public class TrainTest {
       assertEquals(nextStop, train.getNextStop());
     }
   }
+
+  /**
+   * Test the CO2 consumption calculation for the train.
+   */
+  @Test
+  public void testCo2Consumption() {
+    Route testRouteOut = createTestOutRoute();
+    Route testRouteIn = createTestInRoute();
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Train train = new Train(0, testLine, 5, 1);
+
+    // Assuming the train has no passengers, the CO2 consumption should be based on the train itself
+    int expectedCo2 = 6;
+    assertEquals(expectedCo2, train.co2Consumption());
+
+    // Add passengers and check CO2 consumption again
+    List<Passenger> passengers = createPassengers(3);
+    train.loadPassenger(passengers.get(0));
+    train.loadPassenger(passengers.get(1));
+    train.loadPassenger(passengers.get(2));
+
+    expectedCo2 += 3 * 3; // Each passenger adds 3 to CO2 consumption
+    assertEquals(expectedCo2, train.co2Consumption());
+  }
 }

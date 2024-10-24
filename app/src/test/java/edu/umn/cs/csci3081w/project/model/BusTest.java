@@ -538,4 +538,28 @@ public class BusTest {
       assertEquals(nextStop, bus.getNextStop());
     }
   }
+
+  /**
+   * Test the CO2 consumption calculation for the bus.
+   */
+  @Test
+  public void testCo2Consumption() {
+    Route testRouteOut = createTestOutRoute();
+    Route testRouteIn = createTestInRoute();
+    Line testLine = new Line(testRouteOut, testRouteIn);
+    Bus bus = new Bus(0, testLine, 5, 1);
+
+    // Assuming the bus has no passengers, the CO2 consumption should be based on the bus itself
+    int expectedCo2 = 4;
+    assertEquals(expectedCo2, bus.co2Consumption());
+
+    // Add passengers and check CO2 consumption again
+    List<Passenger> passengers = createPassengers(3);
+    bus.loadPassenger(passengers.get(0));
+    bus.loadPassenger(passengers.get(1));
+    bus.loadPassenger(passengers.get(2));
+
+    expectedCo2 += 3 * 2; // Each passenger adds 2 to CO2 consumption
+    assertEquals(expectedCo2, bus.co2Consumption());
+  }
 }
