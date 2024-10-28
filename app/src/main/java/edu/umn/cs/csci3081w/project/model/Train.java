@@ -2,12 +2,28 @@ package edu.umn.cs.csci3081w.project.model;
 
 import java.io.PrintStream;
 
+
+/**
+ * Represents a train vehicle in the transit system.
+ * The train operates on a specified line and follows a route with defined stops.
+ */
 public class Train extends Vehicle {
+
+  /**
+   * Constant representing the train vehicle type.
+   */
   public static final String TRAIN_VEHICLE = "TRAIN_VEHICLE";
+
+  /**
+   * Default speed of the train (in some unit, e.g., km/h).
+   */
   public static final double SPEED = 1;
+
+  /**
+   * Maximum capacity of the train.
+   */
   public static final int CAPACITY = 120;
-  private Route outboundRoute;
-  private Route inboundRoute;
+  private Line line;
   private double distanceRemaining;
   private Stop nextStop;
 
@@ -15,18 +31,16 @@ public class Train extends Vehicle {
    * Constructor for a train.
    *
    * @param id       train identifier
-   * @param out      outbound route
-   * @param in       inbound route
+   * @param line     Line object containing outbound and inbound routes
    * @param capacity capacity of the train
    * @param speed    speed of the train
    */
-  public Train(int id, Route out, Route in, int capacity, double speed) {
+  public Train(int id, Line line, int capacity, double speed) {
     super(id, capacity, speed, new PassengerLoader(), new PassengerUnloader());
-    this.outboundRoute = out;
-    this.inboundRoute = in;
+    this.line = line;
     this.distanceRemaining = 0;
-    this.nextStop = out.getDestinationStop();
-    setName(out.getName() + id);
+    this.nextStop = line.getOutboundRoute().getNextStop();
+    setName(line.getOutboundRoute().getName() + id);
     setPosition(new Position(nextStop.getPosition().getLongitude(),
         nextStop.getPosition().getLatitude()));
   }
@@ -53,10 +67,22 @@ public class Train extends Vehicle {
     out.println("####Train Info End####");
   }
 
+  /**
+   * Checks if the trip is complete, which occurs when both outbound and
+   * inbound routes have been completed.
+   *
+   * @return true if the trip is complete, false otherwise
+   */
   public boolean isTripComplete() {
-    return outboundRoute.isAtEnd() && inboundRoute.isAtEnd();
+    return line.getOutboundRoute().isAtEnd() && line.getInboundRoute().isAtEnd();
   }
 
+  /**
+   * Loads a new passenger onto the train.
+   *
+   * @param newPassenger the passenger to be loaded
+   * @return the result of the loading operation
+   */
   public int loadPassenger(Passenger newPassenger) {
     return getPassengerLoader().loadPassenger(newPassenger, getCapacity(), getPassengers());
   }
@@ -85,15 +111,16 @@ public class Train extends Vehicle {
     }
 
     // Get the correct route and early exit
-    Route currentRoute = outboundRoute;
-    if (outboundRoute.isAtEnd()) {
-      if (inboundRoute.isAtEnd()) {
+    Route currentRoute = line.getOutboundRoute(); // Update to use line
+    if (line.getOutboundRoute().isAtEnd()) {
+      if (line.getInboundRoute().isAtEnd()) {
         return;
       }
-      currentRoute = inboundRoute;
+      currentRoute = line.getInboundRoute();
     }
+
     Stop prevStop = currentRoute.prevStop();
-    Stop nextStop = currentRoute.getDestinationStop();
+    Stop nextStop = currentRoute.getNextStop();
     double distanceBetween = currentRoute.getNextStopDistance();
     // the ratio shows us how far from the previous stop are we in a ratio from 0 to 1
     double ratio;
@@ -121,10 +148,29 @@ public class Train extends Vehicle {
     move();
   }
 
+  /**
+   * Calculates the amount of CO2 consumed by the train and passengers.
+   *
+   * @return the amount of CO2 consumed by the train and passengers.
+   */
+  public int co2Consumption() {
+    return this.getPassengers().size() * 3 + 6;
+  }
+
+  /**
+   * Unloads passengers at the next stop.
+   *
+   * @return the number of passengers unloaded
+   */
   private int unloadPassengers() {
     return getPassengerUnloader().unloadPassengers(getPassengers(), nextStop);
   }
 
+  /**
+   * Handles the arrival of the train at a stop, managing passenger unloading and loading.
+   *
+   * @return the total number of passengers handled
+   */
   private int handleTrainStop() {
     // This function handles arrival at a train stop
     int passengersHandled = 0;
@@ -143,13 +189,16 @@ public class Train extends Vehicle {
     return passengersHandled;
   }
 
+  /**
+   * Advances the train to the next stop on its route.
+   */
   private void toNextStop() {
     //current stop
     currentRoute().nextStop();
     if (!isTripComplete()) {
       // it's important we call currentRoute() again,
       // as nextStop() may have caused it to change.
-      nextStop = currentRoute().getDestinationStop();
+      nextStop = currentRoute().getNextStop();
       distanceRemaining +=
           currentRoute().getNextStopDistance();
       // note, if distanceRemaining was negative because we
@@ -161,6 +210,11 @@ public class Train extends Vehicle {
     }
   }
 
+  /**
+   * Updates the distance remaining for the train and returns the effective speed.
+   *
+   * @return the effective speed of the train
+   */
   private double updateDistance() {
     // Updates the distance remaining and returns the effective speed of the train
     // Train does not move if speed is negative or train is at end of route
@@ -174,14 +228,24 @@ public class Train extends Vehicle {
     return getSpeed();
   }
 
+  /**
+   * Determines the current route of the train (outbound or inbound).
+   *
+   * @return the current route
+   */
   private Route currentRoute() {
     // Figure out if we're on the outgoing or incoming route
-    if (!outboundRoute.isAtEnd()) {
-      return outboundRoute;
+    if (!line.getOutboundRoute().isAtEnd()) {
+      return line.getOutboundRoute();
     }
-    return inboundRoute;
+    return line.getInboundRoute();
   }
 
+  /**
+   * Gets the next stop the train will approach.
+   *
+   * @return the next stop
+   */
   public Stop getNextStop() {
     return nextStop;
   }
