@@ -5,6 +5,7 @@ import edu.umn.cs.csci3081w.project.model.Position;
 import edu.umn.cs.csci3081w.project.model.RandomPassengerGenerator;
 import edu.umn.cs.csci3081w.project.model.Route;
 import edu.umn.cs.csci3081w.project.model.Stop;
+import edu.umn.cs.csci3081w.project.model.StorageFacility;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +19,11 @@ public class ConfigManager {
   private static final String ROUTE_END = "ROUTE_END";
   private static final String BUS_LINE = "BUS_LINE";
   private static final String TRAIN_LINE = "TRAIN_LINE";
+  private static final String STORAGE_FACILITY_START = "STORAGE_FACILITY_START";
+  private static final String STORAGE_FACILITY_END = "STORAGE_FACILITY_END";
 
   private List<Route> routes = new ArrayList<Route>();
+  private StorageFacility storageFacility;
 
   public ConfigManager() {
 
@@ -40,11 +44,42 @@ public class ConfigManager {
       String currRouteName = "";
       List<Stop> stops = new ArrayList<Stop>();
       List<Double> probabilities = new ArrayList<Double>();
+
+      // Variables for storage facility data
+      int busesNum = 0;
+      int trainsNum = 0;
+      boolean inStorageFacilitySection = false;
+
       Scanner scanner = new Scanner(configFile);
       while (scanner.hasNextLine()) {
         String line = scanner.nextLine();
         String[] splits = line.split(",");
         String chunk = splits[0].trim();
+
+        if (chunk.equals(STORAGE_FACILITY_START)) {
+          inStorageFacilitySection = true;  // Start reading storage info
+          continue;
+        }
+
+        if (chunk.equals(STORAGE_FACILITY_END)) {
+          storageFacility = new StorageFacility(busesNum, trainsNum);  // Store the facility data
+          inStorageFacilitySection = false;
+          continue;
+        }
+
+        if (inStorageFacilitySection) {
+          // Read number of buses and trains
+          String type = splits[0].trim();
+          int value = Integer.parseInt(splits[1].trim());
+          if (type.equalsIgnoreCase("BUSES")) {
+            busesNum = value;
+          } else if (type.equalsIgnoreCase("TRAINS")) {
+            trainsNum = value;
+          }
+          continue;
+        }
+
+
         if (chunk.equals(LINE_START)) {
           currLineType = "";
           String lineTypeFromConfig = splits[1].trim();
@@ -102,5 +137,9 @@ public class ConfigManager {
 
   public List<Route> getRoutes() {
     return routes;
+  }
+
+  public StorageFacility getStorageFacility() {
+    return storageFacility;
   }
 }

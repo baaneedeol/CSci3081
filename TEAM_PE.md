@@ -7,6 +7,7 @@
 
 #### Distribution of Work
 **Step 1: Please, provide here a brief description (one short paragraph) of the distribution of work across your team. You can refine this description as you carry out the project iteration.**
+
 * For Project Iteration 1, we plan on dividing up the three recommended tasks (tasks 1-3, 12) among the team. Daniela will take on task 2, Baanee will take on task 3, and Joey will take on task 12.
 * We will collaborate on task 1 as a group. For the remaining tasks, we will continue to assign them based on their content.
 
