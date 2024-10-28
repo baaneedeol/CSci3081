@@ -141,15 +141,18 @@ public class VisualTransitSimulator {
     }
   }
 
+  /**
+   * Pauses and unpauses the simulation.
+   */
+  public void togglePause() {
+    paused = !paused;
+  }
+
   public List<Route> getRoutes() {
     return routes;
   }
 
   public List<Vehicle> getActiveVehicles() {
     return activeVehicles;
-  }
-
-  public void togglePause() {
-    paused = !paused;
   }
 }
