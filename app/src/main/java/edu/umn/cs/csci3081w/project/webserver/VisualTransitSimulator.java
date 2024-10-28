@@ -2,6 +2,7 @@ package edu.umn.cs.csci3081w.project.webserver;
 
 import edu.umn.cs.csci3081w.project.model.Bus;
 import edu.umn.cs.csci3081w.project.model.Counter;
+import edu.umn.cs.csci3081w.project.model.Line;
 import edu.umn.cs.csci3081w.project.model.Route;
 import edu.umn.cs.csci3081w.project.model.Train;
 import edu.umn.cs.csci3081w.project.model.Vehicle;
@@ -21,6 +22,7 @@ public class VisualTransitSimulator {
   private List<Integer> vehicleStartTimings;
   private List<Integer> timeSinceLastVehicle;
   private StorageFacility storageFacility;
+  private boolean paused = false;
 
   /**
    * Constructor for Simulation.
@@ -64,6 +66,9 @@ public class VisualTransitSimulator {
    * Updates the simulation at each step.
    */
   public void update() {
+    if (paused) {
+      return;
+    }
     simulationTimeElapsed++;
     if (simulationTimeElapsed > numTimeSteps) {
       return;
@@ -75,30 +80,25 @@ public class VisualTransitSimulator {
       if (timeSinceLastVehicle.get(i) <= 0) {
         Route outbound = routes.get(2 * i);
         Route inbound = routes.get(2 * i + 1);
+        Line line = new Line(outbound.shallowCopy(), inbound.shallowCopy());
         if (outbound.getLineType().equals(Route.BUS_LINE)
             && inbound.getLineType().equals(Route.BUS_LINE)) {
-              if (storageFacility.createBus()) {  // Check if a bus is available
-          activeVehicles
-              .add(new Bus(counter.getBusIdCounterAndIncrement(), outbound.shallowCopy(),
-                  inbound.shallowCopy(), Bus.CAPACITY, Bus.SPEED));
-          System.out.println("Bus created at time: " + simulationTimeElapsed + ". Remaining buses: " + storageFacility.getBusesNum());
-          }        
-          else {
-            System.out.println("No buses available to create.");
-          }
-          // timeSinceLastVehicle.set(i, vehicleStartTimings.get(i));
-          // timeSinceLastVehicle.set(i, timeSinceLastVehicle.get(i) - 1);
-        } else if (outbound.getLineType().equals(Route.TRAIN_LINE)
-            && inbound.getLineType().equals(Route.TRAIN_LINE)) {
+            if (storageFacility.createBus()) {  // Check if a bus is available
+              activeVehicles.add(new Bus(counter.getBusIdCounterAndIncrement(), line, Bus.CAPACITY, Bus.SPEED));
+              System.out.println("Bus created at time: " + simulationTimeElapsed + ". Remaining buses: " + storageFacility.getBusesNum());
+            }        
+            else {
+              System.out.println("No buses available to create.");
+            }
+        } 
+        else if (outbound.getLineType().equals(Route.TRAIN_LINE) && inbound.getLineType().equals(Route.TRAIN_LINE)) {
           if (storageFacility.createTrain()) {  // Check if a train is available    
-            activeVehicles.add(new Train(counter.getTrainIdCounterAndIncrement(), outbound.shallowCopy(),inbound.shallowCopy(), Train.CAPACITY, Train.SPEED));
+            activeVehicles.add(new Train(counter.getTrainIdCounterAndIncrement(), line, Train.CAPACITY, Train.SPEED));
             System.out.println("Train created at time: " + simulationTimeElapsed + ". Remaining trains: " + storageFacility.getTrainsNum());
           }
           else {
             System.out.println("No trains available to create.");
           }
-          // timeSinceLastVehicle.set(i, vehicleStartTimings.get(i));
-          // timeSinceLastVehicle.set(i, timeSinceLastVehicle.get(i) - 1);
         }
         timeSinceLastVehicle.set(i, vehicleStartTimings.get(i));
       } else {
@@ -147,5 +147,9 @@ public class VisualTransitSimulator {
 
   public List<Vehicle> getActiveVehicles() {
     return activeVehicles;
+  }
+
+  public void togglePause() {
+    paused = !paused;
   }
 }
