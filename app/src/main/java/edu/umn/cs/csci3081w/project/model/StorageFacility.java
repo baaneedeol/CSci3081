@@ -32,4 +32,29 @@ public class StorageFacility {
                 ", trainsNum=" + trainsNum +
                 '}';
     }
+
+    public synchronized boolean createBus() {
+        if (busesNum > 0) {
+            busesNum--;
+            return true;  
+        }
+        return false;  
+    }
+
+    public synchronized boolean createTrain() {
+        if (trainsNum > 0) {
+            trainsNum--;
+            return true;  
+        }
+        return false;  
+    }
+
+    public synchronized void terminateBus() {
+        busesNum++;
+    }
+
+    public synchronized void terminateTrain() {
+        trainsNum++;
+    }
+
 }
