@@ -67,7 +67,7 @@ public class ConfigManager {
           continue;
         }
 
-        if (inStorageFacilitySection) {
+        if (inStorageFacilitySection && (chunk.equals("BUSES") || chunk.equals("TRAINS"))) {
           // Read number of buses and trains
           String type = splits[0].trim();
           int value = Integer.parseInt(splits[1].trim());
