@@ -3,7 +3,17 @@ package edu.umn.cs.csci3081w.project.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * PassengerUnloader is responsible for unloading passengers from a vehicle at a stop.
+ */
 public class PassengerUnloader {
+
+  /**
+   * Default constructor for PassengerUnloader.
+   */
+  public PassengerUnloader() {
+    // Default constructor
+  }
 
   /**
    * Unloads passengers.

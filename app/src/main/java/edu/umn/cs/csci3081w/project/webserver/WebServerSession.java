@@ -11,6 +11,9 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
+/**
+ * WebServerSession class handles the WebSocket connection and communication with the client.
+ */
 @ServerEndpoint(
     value = "/simulator",
     subprotocols = {"web_server"}
@@ -20,6 +23,9 @@ public class WebServerSession {
   private Session session;
   private WebServerSessionState webServerState;
 
+  /**
+   * Constructor for WebServerSession.
+   */
   public WebServerSession() {
     System.out.println("class loaded " + this.getClass());
   }
@@ -77,6 +83,11 @@ public class WebServerSession {
     }
   }
 
+  /**
+   * Runs when an error occurs.
+   *
+   * @param e error
+   */
   @OnError
   public void onError(Throwable e) {
     e.printStackTrace();

@@ -5,10 +5,18 @@ import com.google.gson.JsonObject;
 import edu.umn.cs.csci3081w.project.model.Route;
 import java.util.List;
 
+/**
+ * Command to get routes information from the simulation.
+ */
 public class GetRoutesCommand extends SimulatorCommand {
 
   private VisualTransitSimulator simulator;
 
+  /**
+   * Constructor for GetRoutesCommand.
+   *
+   * @param simulator the VisualTransitSimulator instance.
+   */
   public GetRoutesCommand(VisualTransitSimulator simulator) {
     this.simulator = simulator;
   }

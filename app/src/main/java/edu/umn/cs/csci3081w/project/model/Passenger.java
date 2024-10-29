@@ -2,6 +2,9 @@ package edu.umn.cs.csci3081w.project.model;
 
 import java.io.PrintStream;
 
+/**
+ * Represents a passenger in the transit system.
+ */
 public class Passenger {
 
   private String name;
@@ -33,14 +36,27 @@ public class Passenger {
     }
   }
 
+  /**
+   * Set passenger on vehicle.
+   */
   public void setOnVehicle() {
     timeOnVehicle = 1;
   }
 
+  /**
+   * Check if passenger is on vehicle.
+   *
+   * @return true if passenger is on vehicle, false otherwise
+   */
   public boolean isOnVehicle() {
     return timeOnVehicle > 0;
   }
 
+  /**
+   * Get destination stop id.
+   *
+   * @return destination stop id
+   */
   public int getDestination() {
     return destinationStopId;
   }

@@ -7,10 +7,18 @@ import edu.umn.cs.csci3081w.project.model.Train;
 import edu.umn.cs.csci3081w.project.model.Vehicle;
 import java.util.List;
 
+/**
+ * Command to get vehicles information from the simulation.
+ */
 public class GetVehiclesCommand extends SimulatorCommand {
 
   private VisualTransitSimulator simulator;
 
+  /**
+   * Constructor for GetVehiclesCommand.
+   *
+   * @param simulator the VisualTransitSimulator instance.
+   */
   public GetVehiclesCommand(VisualTransitSimulator simulator) {
     this.simulator = simulator;
   }

@@ -4,12 +4,16 @@ import edu.umn.cs.csci3081w.project.model.Bus;
 import edu.umn.cs.csci3081w.project.model.Counter;
 import edu.umn.cs.csci3081w.project.model.Line;
 import edu.umn.cs.csci3081w.project.model.Route;
+import edu.umn.cs.csci3081w.project.model.StorageFacility;
 import edu.umn.cs.csci3081w.project.model.Train;
 import edu.umn.cs.csci3081w.project.model.Vehicle;
-import edu.umn.cs.csci3081w.project.model.StorageFacility;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class simulates a visual transit system. It is the central controller of the simulation,
+ * managing routes, vehicles, and the storage facility.
+ */
 public class VisualTransitSimulator {
 
   private static boolean LOGGING = false;
@@ -83,20 +87,30 @@ public class VisualTransitSimulator {
         Line line = new Line(outbound.shallowCopy(), inbound.shallowCopy());
         if (outbound.getLineType().equals(Route.BUS_LINE)
             && inbound.getLineType().equals(Route.BUS_LINE)) {
-            if (storageFacility.createBus()) {  // Check if a bus is available
-              activeVehicles.add(new Bus(counter.getBusIdCounterAndIncrement(), line, Bus.CAPACITY, Bus.SPEED));
-              System.out.println("Bus created at time: " + simulationTimeElapsed + ". Remaining buses: " + storageFacility.getBusesNum());
-            }        
-            else {
-              System.out.println("No buses available to create.");
-            }
-        } 
-        else if (outbound.getLineType().equals(Route.TRAIN_LINE) && inbound.getLineType().equals(Route.TRAIN_LINE)) {
-          if (storageFacility.createTrain()) {  // Check if a train is available    
-            activeVehicles.add(new Train(counter.getTrainIdCounterAndIncrement(), line, Train.CAPACITY, Train.SPEED));
-            System.out.println("Train created at time: " + simulationTimeElapsed + ". Remaining trains: " + storageFacility.getTrainsNum());
+          if (storageFacility.createBus()) {  // Check if a bus is available
+            activeVehicles.add(new Bus(counter.getBusIdCounterAndIncrement(),
+                line,
+                Bus.CAPACITY,
+                Bus.SPEED));
+            System.out.println("Bus created at time: "
+                + simulationTimeElapsed
+                + ". Remaining buses: "
+                + storageFacility.getBusesNum());
+          } else {
+            System.out.println("No buses available to create.");
           }
-          else {
+        } else if (outbound.getLineType().equals(Route.TRAIN_LINE)
+            && inbound.getLineType().equals(Route.TRAIN_LINE)) {
+          if (storageFacility.createTrain()) {  // Check if a train is available    
+            activeVehicles.add(new Train(counter.getTrainIdCounterAndIncrement(),
+                line,
+                Train.CAPACITY,
+                Train.SPEED));
+            System.out.println("Train created at time: "
+                + simulationTimeElapsed
+                + ". Remaining trains: "
+                + storageFacility.getTrainsNum());
+          } else {
             System.out.println("No trains available to create.");
           }
         }
@@ -113,18 +127,16 @@ public class VisualTransitSimulator {
       if (currVehicle.isTripComplete()) {
         Vehicle completedTripVehicle = activeVehicles.remove(i);
         completedTripVehicles.add(completedTripVehicle);
-      
+
         // Release the vehicle back to the storage facility
         if (completedTripVehicle instanceof Bus) {
           storageFacility.terminateBus();
           System.out.println("Bus completed its trip and returned to storage.");
-        }
-        else if (completedTripVehicle instanceof Train) {
+        } else if (completedTripVehicle instanceof Train) {
           storageFacility.terminateTrain();
           System.out.println("Train completed its trip and returned to storage.");
         }
-      }
-      else {
+      } else {
         if (LOGGING) {
           currVehicle.report(System.out);
         }
@@ -148,10 +160,20 @@ public class VisualTransitSimulator {
     paused = !paused;
   }
 
+  /**
+   * Returns the routes in the simulation.
+   *
+   * @return the list routes.
+   */
   public List<Route> getRoutes() {
     return routes;
   }
 
+  /**
+   * Returns the active vehicles in the simulation.
+   *
+   * @return the list of active vehicles.
+   */
   public List<Vehicle> getActiveVehicles() {
     return activeVehicles;
   }

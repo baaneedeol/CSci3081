@@ -12,6 +12,10 @@ import java.util.List;
 import java.util.Scanner;
 import org.apache.commons.io.FileUtils;
 
+/**
+ * ConfigManager is responsible for reading the configuration file and
+ * creating the routes and storage facility.
+ */
 public class ConfigManager {
   private static final String LINE_START = "LINE_START";
   private static final String LINE_END = "LINE_END";
@@ -25,6 +29,9 @@ public class ConfigManager {
   private List<Route> routes = new ArrayList<Route>();
   private StorageFacility storageFacility;
 
+  /**
+   * Default constructor for ConfigManager.
+   */
   public ConfigManager() {
 
   }
@@ -135,10 +142,20 @@ public class ConfigManager {
     }
   }
 
+  /**
+   * Get the routes in the configuration.
+   *
+   * @return list of routes
+   */
   public List<Route> getRoutes() {
     return routes;
   }
 
+  /**
+   * Get the storage facility.
+   *
+   * @return storage facility
+   */
   public StorageFacility getStorageFacility() {
     return storageFacility;
   }

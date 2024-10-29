@@ -2,18 +2,21 @@ package edu.umn.cs.csci3081w.project.model;
 
 import java.util.Random;
 
+/**
+ * PassengerFactory is responsible for generating passengers with random names and destinations.
+ */
 public class PassengerFactory {
   private static final String[] namePrefix;
   private static final String[] nameSuffix;
   private static final String[] nameStemsArray;
   private static Random rand;
-  //variable added to make testing deterministic
+  /** The flag to indicate if the name generation is deterministic. */
   public static boolean DETERMINISTIC = false;
-  //deterministic set of names for testing purposes
+  /** The deterministic names for testing purposes. */
   public static final String[] DETERMINISTIC_NAMES = {"Goldy", "President", "Coach"};
-  //deterministic names count
+  /** The count of deterministic names generated. */
   public static int DETERMINISTIC_NAMES_COUNT = 0;
-  //deterministic destination count
+  /** The count of deterministic destinations generated. */
   public static int DETERMINISTIC_DESTINATION_COUNT = 0;
 
   static {
@@ -39,6 +42,13 @@ public class PassengerFactory {
         "inept", "iuv", "obe", "ocul", "orbis"
     };
     rand = new Random();
+  }
+
+  /**
+   * Uses default constructor.
+   */
+  private PassengerFactory() {
+    // Default constructor
   }
 
   /**

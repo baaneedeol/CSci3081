@@ -2,7 +2,17 @@ package edu.umn.cs.csci3081w.project.model;
 
 import java.util.List;
 
+/**
+ * PassengerLoader is responsible for loading passengers onto a vehicle.
+ */
 public class PassengerLoader {
+
+  /**
+   * Uses default constructor for PassengerLoader.
+   */
+  public PassengerLoader() {
+    // Default constructor
+  }
 
   /**
    * Loads a passenger.

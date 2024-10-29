@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Represents a stop in the transit system.
+ */
 public class Stop {
   private int id;
   private String name;
@@ -89,19 +92,39 @@ public class Stop {
     out.println("####Stop Info End####");
   }
 
+  /**
+   * Get the id of the stop.
+   *
+   * @return id of the stop.
+   */
   public int getId() {
     return id;
   }
 
 
+  /**
+   * Get the name of the stop.
+   *
+   * @return name of the stop.
+   */
   public String getName() {
     return name;
   }
 
+  /**
+   * Get the position of the stop.
+   *
+   * @return position of the stop.
+   */
   public Position getPosition() {
     return position;
   }
 
+  /**
+   * Get the list of passengers waiting at the stop.
+   *
+   * @return list of passengers.
+   */
   public List<Passenger> getPassengers() {
     return passengers;
   }
